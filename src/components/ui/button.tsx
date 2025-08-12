@@ -21,7 +21,9 @@ const buttonVariants = cva(
         hero:
           "bg-gradient-to-br from-primary to-sidebar-ring text-primary-foreground shadow-[var(--shadow-elegant)] hover:from-primary/90 hover:to-sidebar-ring/90",
         soft:
-          "bg-muted text-muted-foreground hover:bg-muted/80"
+          "bg-muted text-muted-foreground hover:bg-muted/80",
+        whatsapp:
+          "bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))] hover:bg-[hsl(var(--success))/0.9]"
       },
       size: {
         default: "h-10 px-4 py-2",

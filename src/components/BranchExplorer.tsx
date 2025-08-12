@@ -73,7 +73,7 @@ const ApartmentCard = ({ apartment, branchName }: { apartment: Apartment; branch
                         <p className="font-medium">{room.name}</p>
                         <p className="text-sm text-muted-foreground">Sleeps {room.capacity} • ${room.pricePerNight}/night</p>
                       </div>
-                      <Button variant="outline" asChild>
+                      <Button variant="default" asChild>
                         <a href={makeWhatsAppLink(msg)} target="_blank" rel="noopener noreferrer" aria-label={`Book ${room.name} on WhatsApp`}>
                           Book Room
                         </a>
@@ -91,7 +91,7 @@ const ApartmentCard = ({ apartment, branchName }: { apartment: Apartment; branch
           <p className="text-sm text-muted-foreground">Entire apartment</p>
           <p className="text-lg font-semibold">${apartment.pricePerNight}/night</p>
         </div>
-        <Button variant="hero" asChild>
+        <Button variant="default" asChild>
           <a href={makeWhatsAppLink(aptMsg)} target="_blank" rel="noopener noreferrer" aria-label={`Book apartment ${apartment.name} on WhatsApp`}>
             Book Apartment
           </a>

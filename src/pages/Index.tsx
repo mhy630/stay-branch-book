@@ -34,10 +34,10 @@ const Index = () => {
             <div className="grid items-center gap-10 md:grid-cols-2">
               <div>
                 <p className="text-sm uppercase tracking-widest text-muted-foreground">Simple stays, smarter booking</p>
-                <h1 className="mt-3 text-4xl md:text-5xl font-bold leading-tight gradient-text">Book your next stay with {brand}</h1>
+                <h1 className="mt-3 text-4xl md:text-5xl font-bold leading-tight text-foreground">Book your next stay with {brand}</h1>
                 <p className="mt-4 text-lg text-muted-foreground max-w-prose">Find our branches, explore apartments and rooms, and start your booking on WhatsApp. Fast, personal, and convenient.</p>
                 <div className="mt-8 flex flex-wrap gap-4">
-                  <Button variant="hero" size="lg" asChild>
+                  <Button variant="whatsapp" size="lg" asChild>
                     <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi! I want to know more about availability.')}`} target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a>
                   </Button>
                   <Button variant="outline" size="lg" asChild>

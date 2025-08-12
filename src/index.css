@@ -20,9 +20,9 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 7%;
 
-    /* Brand: Black + Yellow */
-    --primary: 48 96% 53%;           /* Vibrant brand yellow */
-    --primary-foreground: 0 0% 7%;   /* Black text on yellow */
+    /* Brand: Black + Orange (saturated) */
+    --primary: 24 94% 53%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 0 0% 7%;
@@ -30,7 +30,7 @@ All colors MUST be HSL.
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 30%;
 
-    --accent: 52 100% 96%;           /* Soft yellow tint for subtle accents */
+    --accent: 28 100% 96%;
     --accent-foreground: 0 0% 7%;
 
     --destructive: 0 84.2% 60.2%;
@@ -38,7 +38,7 @@ All colors MUST be HSL.
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 48 96% 53%;              /* Yellow focus ring */
+    --ring: 24 94% 53%;
 
     --radius: 0.75rem;
 
@@ -46,15 +46,19 @@ All colors MUST be HSL.
     --sidebar-foreground: 0 0% 15%;
     --sidebar-primary: 0 0% 7%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 52 100% 96%;
+    --sidebar-accent: 28 100% 96%;
     --sidebar-accent-foreground: 0 0% 7%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 42 96% 45%;      /* Deeper amber for gradients */
+    --sidebar-ring: 22 94% 45%;
 
     /* Extended tokens */
-    --primary-glow: 50 100% 50%;
+    --primary-glow: 24 94% 55%;
     --shadow-elegant: 0 10px 30px -10px hsl(var(--primary-glow) / 0.35);
     --shadow-soft: 0 8px 20px -8px hsl(var(--foreground) / 0.08);
+
+    /* Status */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
   }
 
   .dark {
@@ -68,8 +72,8 @@ All colors MUST be HSL.
     --popover-foreground: 210 40% 98%;
 
     /* Brand in dark mode */
-    --primary: 48 96% 53%;
-    --primary-foreground: 0 0% 7%;
+    --primary: 24 94% 53%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -85,7 +89,7 @@ All colors MUST be HSL.
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 48 96% 53%;
+    --ring: 24 94% 53%;
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -94,7 +98,11 @@ All colors MUST be HSL.
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 42 96% 45%;
+    --sidebar-ring: 22 94% 45%;
+
+    /* Status */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
   }
 }
 

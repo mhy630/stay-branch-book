@@ -52,11 +52,10 @@ export const branches: Branch[] = [
         bathrooms: 2,
         pricePerNight: 120,
         image: "/placeholder.svg",
-        rooms: [
-          { id: "r1", name: "Queen Room", capacity: 2, pricePerNight: 60 },
-          { id: "r2", name: "Twin Room", capacity: 2, pricePerNight: 50 },
-          { id: "r3", name: "Cozy Den", capacity: 1, pricePerNight: 35 },
-        ],
+         rooms: [
+           { id: "r1", name: "Queen Room", capacity: 2, pricePerNight: 60 },
+           { id: "r2", name: "Twin Room", capacity: 2, pricePerNight: 50 },
+         ],
       },
     ],
   },
@@ -95,9 +94,10 @@ export const branches: Branch[] = [
         bathrooms: 1,
         pricePerNight: 65,
         image: "/placeholder.svg",
-        rooms: [
-          { id: "r1", name: "Classic Room", capacity: 2, pricePerNight: 40 },
-        ],
+         rooms: [
+           { id: "r1", name: "Classic Room", capacity: 2, pricePerNight: 40 },
+           { id: "r2", name: "City View Room", capacity: 2, pricePerNight: 45 },
+         ],
       },
     ],
   },
