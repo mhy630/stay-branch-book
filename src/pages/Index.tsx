@@ -25,7 +25,7 @@ const Index = () => {
   };
 
   return (
-    <main>
+    <div>
       <Seo title={title} description={description} image={hero} jsonLd={jsonLd} />
 
       <section className="relative overflow-hidden">
@@ -56,7 +56,7 @@ const Index = () => {
       <div id="explore">
         <BranchExplorer />
       </div>
-    </main>
+    </div>
   );
 };
 
