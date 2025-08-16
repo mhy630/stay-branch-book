@@ -19,7 +19,7 @@ export const Header = () => {
             <a href="#explore" className="text-muted-foreground hover:text-foreground transition-colors">
               Branches
             </a>
-            <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="/about" className="text-muted-foreground hover:text-foreground transition-colors">
               About
             </a>
             <Button variant="whatsapp" size="sm" asChild>
