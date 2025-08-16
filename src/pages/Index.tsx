@@ -5,9 +5,9 @@ import { Seo } from "@/components/Seo";
 import { WHATSAPP_NUMBER } from "@/config";
 
 const Index = () => {
-  const brand = "StayHub";
-  const title = `${brand} — Book Apartments & Rooms across Branches`;
-  const description = "Discover branches, browse apartments and rooms, and book via WhatsApp in one click.";
+  const brand = "Raye Kam-Kiraye";
+  const title = `${brand} — Affordable Apartments & Rooms across Branches`;
+  const description = "Find budget-friendly branches, browse affordable apartments and rooms, and book via WhatsApp in one click.";
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -33,9 +33,11 @@ const Index = () => {
           <div className="container mx-auto px-6 py-20 md:py-28" onMouseMove={onMouseMove}>
             <div className="grid items-center gap-10 md:grid-cols-2">
               <div>
-                <p className="text-sm uppercase tracking-widest text-muted-foreground">Simple stays, smarter booking</p>
-                <h1 className="mt-3 text-4xl md:text-5xl font-bold leading-tight text-foreground">Book your next stay with {brand}</h1>
-                <p className="mt-4 text-lg text-muted-foreground max-w-prose">Find our branches, explore apartments and rooms, and start your booking on WhatsApp. Fast, personal, and convenient.</p>
+                <p className="text-sm uppercase tracking-widest text-muted-foreground">Affordable stays, easy booking</p>
+                <h1 className="mt-3 text-4xl md:text-5xl font-bold leading-tight text-foreground">
+                  Affordable stays with <span className="text-primary">Raye</span> Kam-Kiraye
+                </h1>
+                <p className="mt-4 text-lg text-muted-foreground max-w-prose">Discover budget-friendly apartments and rooms across our branches. Quality accommodation at prices that won't break the bank. Book easily via WhatsApp.</p>
                 <div className="mt-8 flex flex-wrap gap-4">
                   <Button variant="whatsapp" size="lg" asChild>
                     <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi! I want to know more about availability.')}`} target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a>

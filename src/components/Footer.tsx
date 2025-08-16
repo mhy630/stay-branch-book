@@ -8,12 +8,14 @@ export const Footer = () => {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-lg">
-                <span className="text-primary-foreground font-bold text-lg">S</span>
+                <span className="text-primary-foreground font-bold text-lg">R</span>
               </div>
-              <span className="text-xl font-bold text-primary">StayHub</span>
+              <span className="text-xl font-bold">
+                <span className="text-primary">Raye</span> <span className="text-foreground">Kam-Kiraye</span>
+              </span>
             </div>
             <p className="text-muted-foreground text-sm">
-              Find your perfect stay across our branches. Book apartments and rooms with ease.
+              Affordable accommodation across our branches. Quality stays at budget-friendly prices.
             </p>
           </div>
           
@@ -47,7 +49,7 @@ export const Footer = () => {
         
         <div className="border-t mt-8 pt-8 text-center">
           <p className="text-muted-foreground text-sm">
-            © 2024 StayHub. All rights reserved.
+            © 2024 Raye Kam-Kiraye. All rights reserved.
           </p>
         </div>
       </div>
