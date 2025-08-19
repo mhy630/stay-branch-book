@@ -10,7 +10,7 @@ export const Footer = () => {
               <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-lg">
                 <span className="text-primary-foreground font-bold text-lg">R</span>
               </div>
-              <span className="text-xl font-heading font-bold">
+              <span className="text-xl font-bold">
                 <span className="text-primary">Raye</span> <span className="text-foreground">Kam-Kiraye</span>
               </span>
             </div>
@@ -20,7 +20,7 @@ export const Footer = () => {
           </div>
           
           <div>
-            <h3 className="font-heading font-semibold mb-4">Quick Links</h3>
+            <h3 className="font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm">
               <li><a href="#explore" className="text-muted-foreground hover:text-foreground transition-colors">Browse Branches</a></li>
               <li><a href="/about" className="text-muted-foreground hover:text-foreground transition-colors">About Us</a></li>
@@ -29,7 +29,7 @@ export const Footer = () => {
           </div>
           
           <div>
-            <h3 className="font-heading font-semibold mb-4">Support</h3>
+            <h3 className="font-semibold mb-4">Support</h3>
             <ul className="space-y-2 text-sm">
               <li><a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">WhatsApp Support</a></li>
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Help Center</a></li>
@@ -38,7 +38,7 @@ export const Footer = () => {
           </div>
           
           <div>
-            <h3 className="font-heading font-semibold mb-4">Legal</h3>
+            <h3 className="font-semibold mb-4">Legal</h3>
             <ul className="space-y-2 text-sm">
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a></li>
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a></li>

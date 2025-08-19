@@ -10,7 +10,7 @@ export const Header = () => {
             <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-lg">
               <span className="text-primary-foreground font-bold text-lg">R</span>
             </div>
-            <span className="text-xl font-heading font-bold">
+            <span className="text-xl font-bold">
               <span className="text-primary">Raye</span> <span className="text-foreground">Kam-Kiraye</span>
             </span>
           </div>
