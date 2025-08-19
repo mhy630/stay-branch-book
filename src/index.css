@@ -7,52 +7,53 @@ All colors MUST be HSL.
 */
 
 /* Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Garet:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Glacial+Indifference:wght@400;500;600;700&display=swap');
 
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 7%;
+    --foreground: 30 8% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 7%;
+    --card-foreground: 30 8% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 7%;
+    --popover-foreground: 30 8% 20%;
 
-    /* Brand: Black + Orange (saturated) */
-    --primary: 24 94% 53%;
+    /* Brand: Orange + Dark Gray */
+    --primary: 26 100% 53%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 0 0% 7%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 30 8% 20%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 30%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 28 100% 96%;
-    --accent-foreground: 0 0% 7%;
+    --accent: 26 100% 96%;
+    --accent-foreground: 30 8% 20%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 24 94% 53%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 26 100% 53%;
 
     --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 15%;
-    --sidebar-primary: 0 0% 7%;
+    --sidebar-foreground: 30 8% 20%;
+    --sidebar-primary: 30 8% 20%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 28 100% 96%;
-    --sidebar-accent-foreground: 0 0% 7%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 22 94% 45%;
+    --sidebar-accent: 26 100% 96%;
+    --sidebar-accent-foreground: 30 8% 20%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 26 100% 53%;
 
     /* Extended tokens */
-    --primary-glow: 24 94% 55%;
+    --primary-glow: 26 100% 55%;
     --shadow-elegant: 0 10px 30px -10px hsl(var(--primary-glow) / 0.35);
     --shadow-soft: 0 8px 20px -8px hsl(var(--foreground) / 0.08);
 
@@ -62,43 +63,43 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 30 8% 8%;
+    --foreground: 0 0% 98%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 30 8% 8%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 30 8% 8%;
+    --popover-foreground: 0 0% 98%;
 
     /* Brand in dark mode */
-    --primary: 24 94% 53%;
+    --primary: 26 100% 53%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 30 8% 15%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 30 8% 15%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 30 8% 15%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 24 94% 53%;
+    --border: 30 8% 15%;
+    --input: 30 8% 15%;
+    --ring: 26 100% 53%;
 
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-background: 30 8% 10%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 26 100% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 22 94% 45%;
+    --sidebar-accent: 30 8% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 30 8% 15%;
+    --sidebar-ring: 26 100% 53%;
 
     /* Status */
     --success: 142 71% 45%;
@@ -113,7 +114,11 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    font-family: 'Glacial Indifference', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: 'Garet', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   }
 }
 

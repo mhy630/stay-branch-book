@@ -23,23 +23,23 @@ const About = () => {
       <main className="container mx-auto px-6 py-16">
         {/* Hero Section */}
         <section className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+          <h1 className="text-4xl md:text-5xl font-heading font-bold mb-6">
             About <span className="text-primary">Raye</span> Kam-Kiraye
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Making quality accommodation accessible to everyone through our network of affordable branches across the city.
+            We're more than accommodation - we're your trusted friends in hospitality, creating warm, welcoming experiences at honest, affordable prices.
           </p>
         </section>
 
         {/* Mission Section */}
         <section className="grid md:grid-cols-2 gap-12 items-center mb-16">
           <div>
-            <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
+            <h2 className="text-3xl font-heading font-bold mb-6">Our Mission</h2>
             <p className="text-lg text-muted-foreground mb-4">
-              At <span className="text-primary font-semibold">Raye</span> Kam-Kiraye, we believe that everyone deserves access to clean, comfortable, and affordable accommodation. We've built our business around one simple principle: quality doesn't have to be expensive.
+              At <span className="text-primary font-semibold">Raye</span> Kam-Kiraye, we believe everyone deserves a warm welcome and a place that feels like home. We've built our business on genuine hospitality, trustworthy service, and honest pricing that everyone can afford.
             </p>
             <p className="text-lg text-muted-foreground">
-              We've carefully selected and maintained properties across multiple branches to ensure you get the best value for your money without compromising on essential amenities and comfort.
+              Our friendly approach means treating every guest like family, while our commitment to affordability ensures quality stays are accessible to all.
             </p>
           </div>
           <div className="bg-gradient-subtle rounded-lg p-8 text-center">
@@ -54,37 +54,37 @@ const About = () => {
 
         {/* Values Section */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-12">Why Choose Us?</h2>
+          <h2 className="text-3xl font-heading font-bold text-center mb-12">Why Trust Us?</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <Card>
               <CardHeader>
-                <CardTitle className="text-primary">💰 Affordability First</CardTitle>
+                <CardTitle className="text-primary">🤝 Genuine Hospitality</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  We keep our prices low by working directly with property owners and eliminating unnecessary middlemen costs.
+                  We treat every guest like family, creating a warm, welcoming environment that makes you feel instantly at home.
                 </CardDescription>
               </CardContent>
             </Card>
             
             <Card>
               <CardHeader>
-                <CardTitle className="text-primary">🏠 Quality Standards</CardTitle>
+                <CardTitle className="text-primary">💰 Honest Pricing</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Every property is personally inspected to ensure cleanliness, safety, and essential amenities are maintained.
+                  Transparent, affordable rates with no hidden costs - what you see is what you pay, always.
                 </CardDescription>
               </CardContent>
             </Card>
             
             <Card>
               <CardHeader>
-                <CardTitle className="text-primary">📱 Easy Booking</CardTitle>
+                <CardTitle className="text-primary">🛡️ Trustworthy Service</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Simple WhatsApp booking process means no hidden fees, no complicated platforms, just direct communication.
+                  Reliable, consistent quality across all locations with personal attention to your needs and comfort.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -93,23 +93,23 @@ const About = () => {
 
         {/* Story Section */}
         <section className="bg-muted/50 rounded-lg p-8 md:p-12 mb-16">
-          <h2 className="text-3xl font-bold mb-6">Our Story</h2>
+          <h2 className="text-3xl font-heading font-bold mb-6">Our Story</h2>
           <p className="text-lg text-muted-foreground mb-4">
-            <span className="text-primary font-semibold">Raye</span> Kam-Kiraye was founded with a simple observation: finding affordable, decent accommodation shouldn't be a luxury. Too many people were paying premium prices for basic needs or compromising on safety and cleanliness to save money.
+            <span className="text-primary font-semibold">Raye</span> Kam-Kiraye was born from a simple belief: hospitality should be warm, welcoming, and affordable for everyone. We saw too many travelers feeling like just another transaction rather than valued guests.
           </p>
           <p className="text-lg text-muted-foreground mb-4">
-            We started by partnering with reliable property owners who shared our vision of providing honest, affordable accommodation. Today, we operate across multiple branches, each carefully selected for accessibility, safety, and value.
+            We built our network of trusted partners who share our commitment to genuine hospitality and honest pricing. Each location is carefully chosen not just for affordability, but for the warm, friendly atmosphere we're known for.
           </p>
           <p className="text-lg text-muted-foreground">
-            Our direct booking approach through WhatsApp ensures transparent pricing and personal service, making your accommodation search as stress-free as possible.
+            Today, we're proud to be the trustworthy choice for guests who want to feel genuinely welcomed while staying within their budget.
           </p>
         </section>
 
         {/* CTA Section */}
         <section className="text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to Find Your Affordable Stay?</h2>
+          <h2 className="text-3xl font-heading font-bold mb-6">Ready to Experience Our Hospitality?</h2>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Browse our branches and discover quality accommodation that fits your budget. Get in touch via WhatsApp for instant availability and booking.
+            Discover a welcoming place to stay that feels like home, with honest pricing and friendly service. Contact us on WhatsApp for a warm, personal booking experience.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Button variant="whatsapp" size="lg" asChild>
