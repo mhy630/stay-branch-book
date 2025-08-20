@@ -14,7 +14,142 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      apartments: {
+        Row: {
+          bathrooms: number
+          bedrooms: number
+          branch_id: string
+          created_at: string
+          description: string | null
+          id: string
+          image: string | null
+          name: string
+          price_per_night: number
+          updated_at: string
+        }
+        Insert: {
+          bathrooms: number
+          bedrooms: number
+          branch_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image?: string | null
+          name: string
+          price_per_night: number
+          updated_at?: string
+        }
+        Update: {
+          bathrooms?: number
+          bedrooms?: number
+          branch_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image?: string | null
+          name?: string
+          price_per_night?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartments_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      branches: {
+        Row: {
+          address: string
+          city: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          city: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          city?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          role?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rooms: {
+        Row: {
+          apartment_id: string
+          capacity: number
+          created_at: string
+          id: string
+          name: string
+          price_per_night: number
+          updated_at: string
+        }
+        Insert: {
+          apartment_id: string
+          capacity: number
+          created_at?: string
+          id?: string
+          name: string
+          price_per_night: number
+          updated_at?: string
+        }
+        Update: {
+          apartment_id?: string
+          capacity?: number
+          created_at?: string
+          id?: string
+          name?: string
+          price_per_night?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rooms_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
