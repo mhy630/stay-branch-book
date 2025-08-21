@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Edit, Trash2, MapPin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import MapPicker from '@/components/MapPicker';
+import GoogleMapPicker from '@/components/GoogleMapPicker';
 
 interface Branch {
   id: string;
@@ -183,7 +183,7 @@ export function BranchManager() {
 
               <div className="space-y-2">
                 <Label>Location on Map</Label>
-                <MapPicker
+                <GoogleMapPicker
                   latitude={formData.latitude}
                   longitude={formData.longitude}
                   onLocationChange={handleLocationChange}

@@ -1,87 +1,95 @@
 import React, { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { Loader } from '@googlemaps/js-api-loader';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
-interface MapPickerProps {
+interface GoogleMapPickerProps {
   latitude?: number;
   longitude?: number;
   onLocationChange: (lat: number, lng: number) => void;
 }
 
-const MapPicker: React.FC<MapPickerProps> = ({ 
+const GoogleMapPicker: React.FC<GoogleMapPickerProps> = ({ 
   latitude = 28.6139, 
   longitude = 77.2090, 
   onLocationChange 
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const marker = useRef<mapboxgl.Marker | null>(null);
+  const map = useRef<google.maps.Map | null>(null);
+  const marker = useRef<google.maps.Marker | null>(null);
   const [apiKey, setApiKey] = useState('');
   const [mapInitialized, setMapInitialized] = useState(false);
   const [coordinates, setCoordinates] = useState({ lat: latitude, lng: longitude });
 
-  const initializeMap = () => {
+  const initializeMap = async () => {
     if (!mapContainer.current || !apiKey) return;
 
-    mapboxgl.accessToken = apiKey;
-    
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: [coordinates.lng, coordinates.lat],
-      zoom: 13,
-    });
+    try {
+      const loader = new Loader({
+        apiKey: apiKey,
+        version: "weekly",
+      });
 
-    // Add navigation controls
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+      await loader.load();
 
-    // Create draggable marker
-    marker.current = new mapboxgl.Marker({ draggable: true })
-      .setLngLat([coordinates.lng, coordinates.lat])
-      .addTo(map.current);
+      map.current = new google.maps.Map(mapContainer.current, {
+        center: { lat: coordinates.lat, lng: coordinates.lng },
+        zoom: 13,
+      });
 
-    // Handle marker drag
-    marker.current.on('dragend', () => {
-      if (marker.current) {
-        const lngLat = marker.current.getLngLat();
-        setCoordinates({ lat: lngLat.lat, lng: lngLat.lng });
-        onLocationChange(lngLat.lat, lngLat.lng);
-      }
-    });
+      // Create draggable marker
+      marker.current = new google.maps.Marker({
+        position: { lat: coordinates.lat, lng: coordinates.lng },
+        map: map.current,
+        draggable: true,
+        title: "Drag to set location"
+      });
 
-    // Handle map click
-    map.current.on('click', (e) => {
-      const { lng, lat } = e.lngLat;
-      setCoordinates({ lat, lng });
-      onLocationChange(lat, lng);
-      
-      if (marker.current) {
-        marker.current.setLngLat([lng, lat]);
-      }
-    });
+      // Handle marker drag
+      marker.current.addListener('dragend', () => {
+        if (marker.current) {
+          const position = marker.current.getPosition();
+          if (position) {
+            const lat = position.lat();
+            const lng = position.lng();
+            setCoordinates({ lat, lng });
+            onLocationChange(lat, lng);
+          }
+        }
+      });
 
-    setMapInitialized(true);
+      // Handle map click
+      map.current.addListener('click', (e: google.maps.MapMouseEvent) => {
+        if (e.latLng) {
+          const lat = e.latLng.lat();
+          const lng = e.latLng.lng();
+          setCoordinates({ lat, lng });
+          onLocationChange(lat, lng);
+          
+          if (marker.current) {
+            marker.current.setPosition({ lat, lng });
+          }
+        }
+      });
+
+      setMapInitialized(true);
+    } catch (error) {
+      console.error('Error initializing Google Maps:', error);
+    }
   };
 
   useEffect(() => {
     if (apiKey) {
       initializeMap();
     }
-
-    return () => {
-      if (map.current) {
-        map.current.remove();
-      }
-    };
   }, [apiKey]);
 
   useEffect(() => {
     if (map.current && marker.current && mapInitialized) {
-      map.current.setCenter([coordinates.lng, coordinates.lat]);
-      marker.current.setLngLat([coordinates.lng, coordinates.lat]);
+      const position = { lat: coordinates.lat, lng: coordinates.lng };
+      map.current.setCenter(position);
+      marker.current.setPosition(position);
     }
   }, [coordinates, mapInitialized]);
 
@@ -96,8 +104,9 @@ const MapPicker: React.FC<MapPickerProps> = ({
       onLocationChange(newCoords.lat, newCoords.lng);
       
       if (map.current && marker.current && mapInitialized) {
-        map.current.setCenter([newCoords.lng, newCoords.lat]);
-        marker.current.setLngLat([newCoords.lng, newCoords.lat]);
+        const position = { lat: newCoords.lat, lng: newCoords.lng };
+        map.current.setCenter(position);
+        marker.current.setPosition(position);
       }
     }
   };
@@ -106,23 +115,23 @@ const MapPicker: React.FC<MapPickerProps> = ({
     return (
       <div className="space-y-4 p-4 border rounded-lg bg-muted/50">
         <div>
-          <Label htmlFor="mapbox-token">Mapbox Public Token</Label>
+          <Label htmlFor="google-maps-key">Google Maps API Key</Label>
           <Input
-            id="mapbox-token"
+            id="google-maps-key"
             type="password"
-            placeholder="Enter your Mapbox public token"
+            placeholder="Enter your Google Maps API key"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
           />
           <p className="text-xs text-muted-foreground mt-1">
-            Get your token from{' '}
+            Get your API key from{' '}
             <a 
-              href="https://mapbox.com/" 
+              href="https://developers.google.com/maps/documentation/javascript/get-api-key" 
               target="_blank" 
               rel="noopener noreferrer"
               className="underline text-primary"
             >
-              mapbox.com
+              Google Cloud Console
             </a>
           </p>
         </div>
@@ -167,4 +176,4 @@ const MapPicker: React.FC<MapPickerProps> = ({
   );
 };
 
-export default MapPicker;
+export default GoogleMapPicker;
