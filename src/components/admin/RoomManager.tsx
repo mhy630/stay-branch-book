@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Upload, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Apartment {
@@ -22,6 +22,7 @@ interface Room {
   name: string;
   capacity: number;
   price_per_night: number;
+  image?: string;
   apartments?: { name: string; branches?: { name: string } };
 }
 
@@ -34,8 +35,10 @@ export function RoomManager() {
     apartment_id: '',
     name: '',
     capacity: 1,
-    price_per_night: 0
+    price_per_night: 0,
+    image: ''
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -56,6 +59,26 @@ export function RoomManager() {
     }
   };
 
+  const uploadImage = async (file: File) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `rooms/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('property-images')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data } = supabase.storage
+      .from('property-images')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
+
   const fetchApartments = async () => {
     const { data, error } = await supabase
       .from('apartments')
@@ -72,10 +95,23 @@ export function RoomManager() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    let imageUrl = formData.image;
+    
+    if (imageFile) {
+      try {
+        imageUrl = await uploadImage(imageFile);
+      } catch (error: any) {
+        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+        return;
+      }
+    }
+
+    const submitData = { ...formData, image: imageUrl };
+    
     if (editingRoom) {
       const { error } = await supabase
         .from('rooms')
-        .update(formData)
+        .update(submitData)
         .eq('id', editingRoom.id);
 
       if (error) {
@@ -88,7 +124,7 @@ export function RoomManager() {
     } else {
       const { error } = await supabase
         .from('rooms')
-        .insert([formData]);
+        .insert([submitData]);
 
       if (error) {
         toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -121,9 +157,11 @@ export function RoomManager() {
       apartment_id: '',
       name: '',
       capacity: 1,
-      price_per_night: 0
+      price_per_night: 0,
+      image: ''
     });
     setEditingRoom(null);
+    setImageFile(null);
     setIsDialogOpen(false);
   };
 
@@ -133,7 +171,8 @@ export function RoomManager() {
       apartment_id: room.apartment_id,
       name: room.name,
       capacity: room.capacity,
-      price_per_night: room.price_per_night
+      price_per_night: room.price_per_night,
+      image: room.image || ''
     });
     setIsDialogOpen(true);
   };
@@ -212,6 +251,22 @@ export function RoomManager() {
                   required
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="image">Room Image</Label>
+                <Input
+                  id="image"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                />
+                {formData.image && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <ImageIcon className="h-4 w-4" />
+                    Current image uploaded
+                  </div>
+                )}
+              </div>
               
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={resetForm}>
@@ -236,6 +291,7 @@ export function RoomManager() {
                 <TableHead>Branch</TableHead>
                 <TableHead>Capacity</TableHead>
                 <TableHead>Price/Night</TableHead>
+                <TableHead>Image</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -247,6 +303,16 @@ export function RoomManager() {
                   <TableCell>{room.apartments?.branches?.name || 'N/A'}</TableCell>
                   <TableCell>{room.capacity}</TableCell>
                   <TableCell>${room.price_per_night}</TableCell>
+                  <TableCell>
+                    {room.image ? (
+                      <div className="flex items-center text-sm text-green-600">
+                        <ImageIcon className="h-4 w-4 mr-1" />
+                        Image uploaded
+                      </div>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">No image</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button

@@ -6,14 +6,17 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, MapPin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import MapPicker from '@/components/MapPicker';
 
 interface Branch {
   id: string;
   name: string;
   city: string;
   address: string;
+  latitude?: number;
+  longitude?: number;
   created_at: string;
 }
 
@@ -21,7 +24,13 @@ export function BranchManager() {
   const [branches, setBranches] = useState<Branch[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
-  const [formData, setFormData] = useState({ name: '', city: '', address: '' });
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    city: '', 
+    address: '', 
+    latitude: 28.6139, 
+    longitude: 77.2090 
+  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -89,15 +98,31 @@ export function BranchManager() {
   };
 
   const resetForm = () => {
-    setFormData({ name: '', city: '', address: '' });
+    setFormData({ 
+      name: '', 
+      city: '', 
+      address: '', 
+      latitude: 28.6139, 
+      longitude: 77.2090 
+    });
     setEditingBranch(null);
     setIsDialogOpen(false);
   };
 
   const openEditDialog = (branch: Branch) => {
     setEditingBranch(branch);
-    setFormData({ name: branch.name, city: branch.city, address: branch.address });
+    setFormData({ 
+      name: branch.name, 
+      city: branch.city, 
+      address: branch.address,
+      latitude: branch.latitude || 28.6139,
+      longitude: branch.longitude || 77.2090
+    });
     setIsDialogOpen(true);
+  };
+
+  const handleLocationChange = (lat: number, lng: number) => {
+    setFormData({ ...formData, latitude: lat, longitude: lng });
   };
 
   return (
@@ -115,33 +140,35 @@ export function BranchManager() {
               Add Branch
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingBranch ? 'Edit Branch' : 'Add New Branch'}</DialogTitle>
               <DialogDescription>
-                {editingBranch ? 'Update branch details' : 'Create a new branch location'}
+                {editingBranch ? 'Update branch details and location' : 'Create a new branch location'}
               </DialogDescription>
             </DialogHeader>
             
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  required
-                />
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    value={formData.city}
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    required
+                  />
+                </div>
               </div>
               
               <div className="space-y-2">
@@ -151,6 +178,15 @@ export function BranchManager() {
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Location on Map</Label>
+                <MapPicker
+                  latitude={formData.latitude}
+                  longitude={formData.longitude}
+                  onLocationChange={handleLocationChange}
                 />
               </div>
               
@@ -175,6 +211,7 @@ export function BranchManager() {
                 <TableHead>Name</TableHead>
                 <TableHead>City</TableHead>
                 <TableHead>Address</TableHead>
+                <TableHead>Location</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -184,6 +221,16 @@ export function BranchManager() {
                   <TableCell className="font-medium">{branch.name}</TableCell>
                   <TableCell>{branch.city}</TableCell>
                   <TableCell>{branch.address}</TableCell>
+                  <TableCell>
+                    {branch.latitude && branch.longitude ? (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {branch.latitude.toFixed(4)}, {branch.longitude.toFixed(4)}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Not set</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button

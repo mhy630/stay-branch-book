@@ -67,6 +67,8 @@ export type Database = {
           city: string
           created_at: string
           id: string
+          latitude: number | null
+          longitude: number | null
           name: string
           updated_at: string
         }
@@ -75,6 +77,8 @@ export type Database = {
           city: string
           created_at?: string
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           name: string
           updated_at?: string
         }
@@ -83,6 +87,8 @@ export type Database = {
           city?: string
           created_at?: string
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           name?: string
           updated_at?: string
         }
@@ -118,6 +124,7 @@ export type Database = {
           capacity: number
           created_at: string
           id: string
+          image: string | null
           name: string
           price_per_night: number
           updated_at: string
@@ -127,6 +134,7 @@ export type Database = {
           capacity: number
           created_at?: string
           id?: string
+          image?: string | null
           name: string
           price_per_night: number
           updated_at?: string
@@ -136,6 +144,7 @@ export type Database = {
           capacity?: number
           created_at?: string
           id?: string
+          image?: string | null
           name?: string
           price_per_night?: number
           updated_at?: string
