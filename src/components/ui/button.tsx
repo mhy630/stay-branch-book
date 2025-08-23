@@ -23,7 +23,7 @@ const buttonVariants = cva(
         soft:
           "bg-muted text-muted-foreground hover:bg-muted/80",
         whatsapp:
-          "bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))] hover:bg-[hsl(var(--success))/0.8] transition-colors"
+          "bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))] hover:bg-[hsl(var(--success-hover))] transition-colors"
       },
       size: {
         default: "h-10 px-4 py-2",
