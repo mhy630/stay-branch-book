@@ -252,21 +252,32 @@ export function RoomManager() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="image">Room Image</Label>
-                <Input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                />
-                {formData.image && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <ImageIcon className="h-4 w-4" />
-                    Current image uploaded
-                  </div>
-                )}
-              </div>
+               <div className="space-y-2">
+                 <Label htmlFor="image">Room Image</Label>
+                 <Input
+                   id="image"
+                   type="file"
+                   accept="image/*"
+                   onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                 />
+                 {formData.image && (
+                   <div className="mt-2 space-y-2">
+                     <img 
+                       src={formData.image} 
+                       alt="Current room image" 
+                       className="w-24 h-24 object-cover rounded border"
+                     />
+                     <Button 
+                       type="button" 
+                       variant="outline" 
+                       size="sm"
+                       onClick={() => window.open(formData.image, '_blank')}
+                     >
+                       View Full Image
+                     </Button>
+                   </div>
+                 )}
+               </div>
               
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={resetForm}>
@@ -303,16 +314,19 @@ export function RoomManager() {
                   <TableCell>{room.apartments?.branches?.name || 'N/A'}</TableCell>
                   <TableCell>{room.capacity}</TableCell>
                   <TableCell>${room.price_per_night}</TableCell>
-                  <TableCell>
-                    {room.image ? (
-                      <div className="flex items-center text-sm text-green-600">
-                        <ImageIcon className="h-4 w-4 mr-1" />
-                        Image uploaded
-                      </div>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">No image</span>
-                    )}
-                  </TableCell>
+                   <TableCell>
+                     {room.image ? (
+                       <Button 
+                         variant="outline" 
+                         size="sm"
+                         onClick={() => window.open(room.image!, '_blank')}
+                       >
+                         View Image
+                       </Button>
+                     ) : (
+                       <span className="text-xs text-muted-foreground">No image</span>
+                     )}
+                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button

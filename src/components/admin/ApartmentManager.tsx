@@ -294,6 +294,23 @@ export function ApartmentManager() {
                   accept="image/*"
                   onChange={(e) => setImageFile(e.target.files?.[0] || null)}
                 />
+                {formData.image && (
+                  <div className="mt-2 space-y-2">
+                    <img 
+                      src={formData.image} 
+                      alt="Current apartment image" 
+                      className="w-24 h-24 object-cover rounded border"
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => window.open(formData.image, '_blank')}
+                    >
+                      View Full Image
+                    </Button>
+                  </div>
+                )}
               </div>
               
               <DialogFooter>
@@ -319,6 +336,7 @@ export function ApartmentManager() {
                 <TableHead>Bedrooms</TableHead>
                 <TableHead>Bathrooms</TableHead>
                 <TableHead>Price/Night</TableHead>
+                <TableHead>Image</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -330,6 +348,19 @@ export function ApartmentManager() {
                   <TableCell>{apartment.bedrooms}</TableCell>
                   <TableCell>{apartment.bathrooms}</TableCell>
                   <TableCell>${apartment.price_per_night}</TableCell>
+                  <TableCell>
+                    {apartment.image ? (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.open(apartment.image, '_blank')}
+                      >
+                        View Image
+                      </Button>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">No image</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button

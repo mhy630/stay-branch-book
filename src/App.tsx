@@ -8,6 +8,7 @@ import { Footer } from "@/components/Footer";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import About from "./pages/About";
+import ApartmentDetail from "./pages/ApartmentDetail";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
@@ -41,6 +42,7 @@ const App = () => (
                 <Footer />
               </div>
             } />
+            <Route path="/apartment/:id" element={<ApartmentDetail />} />
             
             {/* Admin routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
