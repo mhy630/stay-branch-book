@@ -142,8 +142,20 @@ export function ApartmentManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this apartment?')) return;
+    if (!confirm('Are you sure you want to delete this apartment? This will also delete all associated rooms.')) return;
 
+    // First delete associated rooms
+    const { error: roomsError } = await supabase
+      .from('rooms')
+      .delete()
+      .eq('apartment_id', id);
+
+    if (roomsError) {
+      toast({ title: 'Error', description: roomsError.message, variant: 'destructive' });
+      return;
+    }
+
+    // Then delete the apartment
     const { error } = await supabase
       .from('apartments')
       .delete()
@@ -152,7 +164,7 @@ export function ApartmentManager() {
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: 'Success', description: 'Apartment deleted successfully' });
+      toast({ title: 'Success', description: 'Apartment and associated rooms deleted successfully' });
       fetchApartments();
     }
   };
@@ -348,19 +360,21 @@ export function ApartmentManager() {
                   <TableCell>{apartment.bedrooms}</TableCell>
                   <TableCell>{apartment.bathrooms}</TableCell>
                   <TableCell>${apartment.price_per_night}</TableCell>
-                  <TableCell>
-                    {apartment.image ? (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => window.open(apartment.image, '_blank')}
-                      >
-                        View Image
-                      </Button>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">No image</span>
-                    )}
-                  </TableCell>
+                   <TableCell>
+                     {apartment.image ? (
+                       <div className="flex space-x-2">
+                         <Button 
+                           variant="outline" 
+                           size="sm"
+                           onClick={() => window.open(apartment.image, '_blank')}
+                         >
+                           View Image
+                         </Button>
+                       </div>
+                     ) : (
+                       <span className="text-xs text-muted-foreground">No image</span>
+                     )}
+                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button

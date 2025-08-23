@@ -314,19 +314,21 @@ export function RoomManager() {
                   <TableCell>{room.apartments?.branches?.name || 'N/A'}</TableCell>
                   <TableCell>{room.capacity}</TableCell>
                   <TableCell>${room.price_per_night}</TableCell>
-                   <TableCell>
-                     {room.image ? (
-                       <Button 
-                         variant="outline" 
-                         size="sm"
-                         onClick={() => window.open(room.image!, '_blank')}
-                       >
-                         View Image
-                       </Button>
-                     ) : (
-                       <span className="text-xs text-muted-foreground">No image</span>
-                     )}
-                   </TableCell>
+                    <TableCell>
+                      {room.image ? (
+                        <div className="flex space-x-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => window.open(room.image!, '_blank')}
+                          >
+                            View Image
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">No image</span>
+                      )}
+                    </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button
