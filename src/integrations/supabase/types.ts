@@ -23,6 +23,7 @@ export type Database = {
           description: string | null
           id: string
           image: string | null
+          images: string[] | null
           name: string
           price_per_night: number
           updated_at: string
@@ -35,6 +36,7 @@ export type Database = {
           description?: string | null
           id?: string
           image?: string | null
+          images?: string[] | null
           name: string
           price_per_night: number
           updated_at?: string
@@ -47,6 +49,7 @@ export type Database = {
           description?: string | null
           id?: string
           image?: string | null
+          images?: string[] | null
           name?: string
           price_per_night?: number
           updated_at?: string
@@ -125,6 +128,7 @@ export type Database = {
           created_at: string
           id: string
           image: string | null
+          images: string[] | null
           name: string
           price_per_night: number
           updated_at: string
@@ -135,6 +139,7 @@ export type Database = {
           created_at?: string
           id?: string
           image?: string | null
+          images?: string[] | null
           name: string
           price_per_night: number
           updated_at?: string
@@ -145,6 +150,7 @@ export type Database = {
           created_at?: string
           id?: string
           image?: string | null
+          images?: string[] | null
           name?: string
           price_per_night?: number
           updated_at?: string

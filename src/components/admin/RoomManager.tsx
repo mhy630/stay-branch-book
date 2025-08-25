@@ -23,6 +23,7 @@ interface Room {
   capacity: number;
   price_per_night: number;
   image?: string;
+  images?: string[];
   apartments?: { name: string; branches?: { name: string } };
 }
 
@@ -36,9 +37,10 @@ export function RoomManager() {
     name: '',
     capacity: 1,
     price_per_night: 0,
-    image: ''
+    image: '',
+    images: [] as string[]
   });
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -95,18 +97,22 @@ export function RoomManager() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    let imageUrl = formData.image;
+    let newImages = [...formData.images];
     
-    if (imageFile) {
+    // Upload new images
+    if (imageFiles.length > 0) {
       try {
-        imageUrl = await uploadImage(imageFile);
+        for (const file of imageFiles) {
+          const imageUrl = await uploadImage(file);
+          newImages.push(imageUrl);
+        }
       } catch (error: any) {
         toast({ title: 'Error', description: error.message, variant: 'destructive' });
         return;
       }
     }
 
-    const submitData = { ...formData, image: imageUrl };
+    const submitData = { ...formData, images: newImages };
     
     if (editingRoom) {
       const { error } = await supabase
@@ -158,10 +164,11 @@ export function RoomManager() {
       name: '',
       capacity: 1,
       price_per_night: 0,
-      image: ''
+      image: '',
+      images: []
     });
     setEditingRoom(null);
-    setImageFile(null);
+    setImageFiles([]);
     setIsDialogOpen(false);
   };
 
@@ -172,9 +179,15 @@ export function RoomManager() {
       name: room.name,
       capacity: room.capacity,
       price_per_night: room.price_per_night,
-      image: room.image || ''
+      image: room.image || '',
+      images: room.images || []
     });
     setIsDialogOpen(true);
+  };
+
+  const removeImage = (index: number) => {
+    const newImages = formData.images.filter((_, i) => i !== index);
+    setFormData({ ...formData, images: newImages });
   };
 
   return (
@@ -239,45 +252,77 @@ export function RoomManager() {
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="price">Price per Night</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.price_per_night}
-                  onChange={(e) => setFormData({ ...formData, price_per_night: parseFloat(e.target.value) })}
-                  required
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="price">Price per Night (PKR)</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.price_per_night}
+                    onChange={(e) => setFormData({ ...formData, price_per_night: parseFloat(e.target.value) })}
+                    required
+                  />
+                </div>
 
-               <div className="space-y-2">
-                 <Label htmlFor="image">Room Image</Label>
-                 <Input
-                   id="image"
-                   type="file"
-                   accept="image/*"
-                   onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                 />
-                 {formData.image && (
-                   <div className="mt-2 space-y-2">
-                     <img 
-                       src={formData.image} 
-                       alt="Current room image" 
-                       className="w-24 h-24 object-cover rounded border"
-                     />
-                     <Button 
-                       type="button" 
-                       variant="outline" 
-                       size="sm"
-                       onClick={() => window.open(formData.image, '_blank')}
-                     >
-                       View Full Image
-                     </Button>
-                   </div>
-                 )}
-               </div>
+              <div className="space-y-2">
+                <Label htmlFor="images">Images</Label>
+                <Input
+                  id="images"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => setImageFiles(Array.from(e.target.files || []))}
+                />
+                
+                {/* Display existing images */}
+                {formData.images.length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    <Label>Current Images:</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {formData.images.map((imageUrl, index) => (
+                        <div key={index} className="relative">
+                          <img 
+                            src={imageUrl} 
+                            alt={`Room image ${index + 1}`} 
+                            className="w-24 h-24 object-cover rounded border"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                            onClick={() => removeImage(index)}
+                          >
+                            ×
+                          </Button>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm"
+                            className="mt-1 w-full text-xs"
+                            onClick={() => window.open(imageUrl, '_blank')}
+                          >
+                            View
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Display selected new images */}
+                {imageFiles.length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    <Label>New Images to Upload:</Label>
+                    <div className="text-sm text-muted-foreground">
+                      {imageFiles.map((file, index) => (
+                        <div key={index}>{file.name}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
               
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={resetForm}>
@@ -301,8 +346,8 @@ export function RoomManager() {
                 <TableHead>Apartment</TableHead>
                 <TableHead>Branch</TableHead>
                 <TableHead>Capacity</TableHead>
-                <TableHead>Price/Night</TableHead>
-                <TableHead>Image</TableHead>
+                <TableHead>Price/Night (PKR)</TableHead>
+                <TableHead>Images</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -313,20 +358,25 @@ export function RoomManager() {
                   <TableCell>{room.apartments?.name || 'N/A'}</TableCell>
                   <TableCell>{room.apartments?.branches?.name || 'N/A'}</TableCell>
                   <TableCell>{room.capacity}</TableCell>
-                  <TableCell>${room.price_per_night}</TableCell>
+                  <TableCell>₨{room.price_per_night}</TableCell>
                     <TableCell>
-                      {room.image ? (
+                      {room.images && room.images.length > 0 ? (
                         <div className="flex space-x-2">
+                          <span className="text-sm">{room.images.length} image(s)</span>
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => window.open(room.image!, '_blank')}
+                            onClick={() => {
+                              room.images.forEach((img, index) => {
+                                setTimeout(() => window.open(img, '_blank'), index * 100);
+                              });
+                            }}
                           >
-                            View Image
+                            View All
                           </Button>
                         </div>
                       ) : (
-                        <span className="text-xs text-muted-foreground">No image</span>
+                        <span className="text-xs text-muted-foreground">No images</span>
                       )}
                     </TableCell>
                   <TableCell>

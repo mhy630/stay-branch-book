@@ -88,7 +88,7 @@ const ApartmentCard = ({ apartment, branchName }: { apartment: BackendApartment;
           <div className="flex items-center gap-2"><Bath className="opacity-70" />{apartment.bathrooms} ba</div>
           <div className="flex items-center gap-2"><MapPin className="opacity-70" />{branchName}</div>
         </div>
-        <p className="mt-4 text-sm text-muted-foreground">From <span className="font-semibold text-foreground">${apartment.price_per_night}</span>/night (entire apartment)</p>
+        <p className="mt-4 text-sm text-muted-foreground">From <span className="font-semibold text-foreground">₨{apartment.price_per_night}</span>/night (entire apartment)</p>
 
         <Accordion type="single" collapsible className="mt-4">
           <AccordionItem value="rooms">
@@ -101,7 +101,7 @@ const ApartmentCard = ({ apartment, branchName }: { apartment: BackendApartment;
                      <li key={room.id} className="flex items-center justify-between rounded-md border p-3">
                        <div className="space-y-1">
                          <p className="font-medium">{room.name}</p>
-                         <p className="text-sm text-muted-foreground">Sleeps {room.capacity} • ${room.price_per_night}/night</p>
+                         <p className="text-sm text-muted-foreground">Sleeps {room.capacity} • ₨{room.price_per_night}/night</p>
                        </div>
                       <Button variant="whatsapp" asChild>
                         <a href={makeWhatsAppLink(msg)} target="_blank" rel="noopener noreferrer" aria-label={`Book ${room.name} on WhatsApp`}>

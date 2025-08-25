@@ -26,6 +26,7 @@ interface Apartment {
   bathrooms: number;
   price_per_night: number;
   image: string;
+  images: string[];
   branches?: { name: string };
 }
 
@@ -41,9 +42,10 @@ export function ApartmentManager() {
     bedrooms: 1,
     bathrooms: 1,
     price_per_night: 0,
-    image: ''
+    image: '',
+    images: [] as string[]
   });
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -100,18 +102,22 @@ export function ApartmentManager() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    let imageUrl = formData.image;
+    let newImages = [...formData.images];
     
-    if (imageFile) {
+    // Upload new images
+    if (imageFiles.length > 0) {
       try {
-        imageUrl = await uploadImage(imageFile);
+        for (const file of imageFiles) {
+          const imageUrl = await uploadImage(file);
+          newImages.push(imageUrl);
+        }
       } catch (error: any) {
         toast({ title: 'Error', description: error.message, variant: 'destructive' });
         return;
       }
     }
 
-    const submitData = { ...formData, image: imageUrl };
+    const submitData = { ...formData, images: newImages };
     
     if (editingApartment) {
       const { error } = await supabase
@@ -177,10 +183,11 @@ export function ApartmentManager() {
       bedrooms: 1,
       bathrooms: 1,
       price_per_night: 0,
-      image: ''
+      image: '',
+      images: []
     });
     setEditingApartment(null);
-    setImageFile(null);
+    setImageFiles([]);
     setIsDialogOpen(false);
   };
 
@@ -193,9 +200,15 @@ export function ApartmentManager() {
       bedrooms: apartment.bedrooms,
       bathrooms: apartment.bathrooms,
       price_per_night: apartment.price_per_night,
-      image: apartment.image
+      image: apartment.image,
+      images: apartment.images || []
     });
     setIsDialogOpen(true);
+  };
+
+  const removeImage = (index: number) => {
+    const newImages = formData.images.filter((_, i) => i !== index);
+    setFormData({ ...formData, images: newImages });
   };
 
   return (
@@ -285,7 +298,7 @@ export function ApartmentManager() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="price">Price per Night</Label>
+                  <Label htmlFor="price">Price per Night (PKR)</Label>
                   <Input
                     id="price"
                     type="number"
@@ -299,28 +312,60 @@ export function ApartmentManager() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="image">Image</Label>
+                <Label htmlFor="images">Images</Label>
                 <Input
-                  id="image"
+                  id="images"
                   type="file"
                   accept="image/*"
-                  onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                  multiple
+                  onChange={(e) => setImageFiles(Array.from(e.target.files || []))}
                 />
-                {formData.image && (
+                
+                {/* Display existing images */}
+                {formData.images.length > 0 && (
                   <div className="mt-2 space-y-2">
-                    <img 
-                      src={formData.image} 
-                      alt="Current apartment image" 
-                      className="w-24 h-24 object-cover rounded border"
-                    />
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => window.open(formData.image, '_blank')}
-                    >
-                      View Full Image
-                    </Button>
+                    <Label>Current Images:</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {formData.images.map((imageUrl, index) => (
+                        <div key={index} className="relative">
+                          <img 
+                            src={imageUrl} 
+                            alt={`Apartment image ${index + 1}`} 
+                            className="w-24 h-24 object-cover rounded border"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                            onClick={() => removeImage(index)}
+                          >
+                            ×
+                          </Button>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm"
+                            className="mt-1 w-full text-xs"
+                            onClick={() => window.open(imageUrl, '_blank')}
+                          >
+                            View
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Display selected new images */}
+                {imageFiles.length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    <Label>New Images to Upload:</Label>
+                    <div className="text-sm text-muted-foreground">
+                      {imageFiles.map((file, index) => (
+                        <div key={index}>{file.name}</div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -347,8 +392,8 @@ export function ApartmentManager() {
                 <TableHead>Branch</TableHead>
                 <TableHead>Bedrooms</TableHead>
                 <TableHead>Bathrooms</TableHead>
-                <TableHead>Price/Night</TableHead>
-                <TableHead>Image</TableHead>
+                <TableHead>Price/Night (PKR)</TableHead>
+                <TableHead>Images</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -359,20 +404,25 @@ export function ApartmentManager() {
                   <TableCell>{apartment.branches?.name || 'N/A'}</TableCell>
                   <TableCell>{apartment.bedrooms}</TableCell>
                   <TableCell>{apartment.bathrooms}</TableCell>
-                  <TableCell>${apartment.price_per_night}</TableCell>
+                  <TableCell>₨{apartment.price_per_night}</TableCell>
                    <TableCell>
-                     {apartment.image ? (
+                     {apartment.images && apartment.images.length > 0 ? (
                        <div className="flex space-x-2">
+                         <span className="text-sm">{apartment.images.length} image(s)</span>
                          <Button 
                            variant="outline" 
                            size="sm"
-                           onClick={() => window.open(apartment.image, '_blank')}
+                           onClick={() => {
+                             apartment.images.forEach((img, index) => {
+                               setTimeout(() => window.open(img, '_blank'), index * 100);
+                             });
+                           }}
                          >
-                           View Image
+                           View All
                          </Button>
                        </div>
                      ) : (
-                       <span className="text-xs text-muted-foreground">No image</span>
+                       <span className="text-xs text-muted-foreground">No images</span>
                      )}
                    </TableCell>
                   <TableCell>

@@ -154,7 +154,7 @@ export default function ApartmentDetail() {
               </p>
             </div>
             <Badge variant="secondary" className="text-lg px-4 py-2">
-              ${apartment.price_per_night}/night
+              ₨{apartment.price_per_night}/night
             </Badge>
           </div>
         </div>
@@ -247,7 +247,7 @@ export default function ApartmentDetail() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold">${apartment.price_per_night}/night</p>
+                        <p className="text-lg font-bold">₨{apartment.price_per_night}/night</p>
                         <Button variant="whatsapp" onClick={bookApartment}>
                           Book Apartment
                         </Button>
@@ -271,7 +271,7 @@ export default function ApartmentDetail() {
                                 </p>
                               </div>
                               <div className="text-right">
-                                <p className="font-semibold">${room.price_per_night}/night</p>
+                                <p className="font-semibold">₨{room.price_per_night}/night</p>
                                 <Button variant="outline" size="sm" onClick={() => bookRoom(room)}>
                                   Book Room
                                 </Button>
