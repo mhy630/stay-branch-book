@@ -124,6 +124,7 @@ export type Database = {
       rooms: {
         Row: {
           apartment_id: string
+          branch_id: string | null
           capacity: number
           created_at: string
           id: string
@@ -135,6 +136,7 @@ export type Database = {
         }
         Insert: {
           apartment_id: string
+          branch_id?: string | null
           capacity: number
           created_at?: string
           id?: string
@@ -146,6 +148,7 @@ export type Database = {
         }
         Update: {
           apartment_id?: string
+          branch_id?: string | null
           capacity?: number
           created_at?: string
           id?: string
@@ -157,10 +160,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_branch_id"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "rooms_apartment_id_fkey"
             columns: ["apartment_id"]
             isOneToOne: false
             referencedRelation: "apartments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rooms_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
             referencedColumns: ["id"]
           },
         ]
