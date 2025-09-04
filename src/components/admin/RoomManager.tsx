@@ -13,27 +13,39 @@ import { useToast } from '@/hooks/use-toast';
 interface Apartment {
   id: string;
   name: string;
+  branch_id: string;
   branches?: { name: string };
+}
+
+interface Branch {
+  id: string;
+  name: string;
+  city: string;
 }
 
 interface Room {
   id: string;
-  apartment_id: string;
+  apartment_id?: string;
+  branch_id?: string;
   name: string;
   capacity: number;
   price_per_night: number;
   image?: string;
   images?: string[];
-  apartments?: { name: string; branches?: { name: string } };
+  apartments?: { name: string; branches?: { name: string } } | null;
+  branches?: { name: string } | null;
 }
 
 export function RoomManager() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [apartments, setApartments] = useState<Apartment[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
+  const [associationType, setAssociationType] = useState<'apartment' | 'branch'>('apartment');
   const [formData, setFormData] = useState({
     apartment_id: '',
+    branch_id: '',
     name: '',
     capacity: 1,
     price_per_night: 0,
@@ -46,18 +58,33 @@ export function RoomManager() {
   useEffect(() => {
     fetchRooms();
     fetchApartments();
+    fetchBranches();
   }, []);
 
   const fetchRooms = async () => {
     const { data, error } = await supabase
       .from('rooms')
-      .select('*, apartments(name, branches(name))')
+      .select(`
+        id,
+        apartment_id,
+        branch_id,
+        name,
+        capacity,
+        price_per_night,
+        image,
+        images,
+        created_at,
+        updated_at,
+        apartments(name, branches(name)),
+        branches(name)
+      `)
       .order('created_at', { ascending: true });
 
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
-      setRooms(data || []);
+      // Type assertion to handle the potential SelectQueryError from branches relation
+      setRooms((data as any) || []);
     }
   };
 
@@ -84,13 +111,26 @@ export function RoomManager() {
   const fetchApartments = async () => {
     const { data, error } = await supabase
       .from('apartments')
-      .select('id, name, branches(name)')
+      .select('id, name, branch_id, branches(name)')
       .order('name');
 
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
       setApartments(data || []);
+    }
+  };
+
+  const fetchBranches = async () => {
+    const { data, error } = await supabase
+      .from('branches')
+      .select('id, name, city')
+      .order('name');
+
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      setBranches(data || []);
     }
   };
 
@@ -113,7 +153,14 @@ export function RoomManager() {
       }
     }
 
-    const submitData = { ...formData, images: newImages };
+    // Set branch_id based on association type
+    let submitData = { ...formData, images: newImages };
+    if (associationType === 'apartment' && formData.apartment_id) {
+      const selectedApartment = apartments.find(apt => apt.id === formData.apartment_id);
+      submitData = { ...submitData, branch_id: selectedApartment?.branch_id || '', apartment_id: formData.apartment_id };
+    } else if (associationType === 'branch') {
+      submitData = { ...submitData, branch_id: formData.branch_id, apartment_id: '' };
+    }
     
     if (editingRoom) {
       const { error } = await supabase
@@ -162,6 +209,7 @@ export function RoomManager() {
   const resetForm = () => {
     setFormData({
       apartment_id: '',
+      branch_id: '',
       name: '',
       capacity: 1,
       price_per_night: 0,
@@ -170,13 +218,16 @@ export function RoomManager() {
     });
     setEditingRoom(null);
     setImageFiles([]);
+    setAssociationType('apartment');
     setIsDialogOpen(false);
   };
 
   const openEditDialog = (room: Room) => {
     setEditingRoom(room);
+    setAssociationType(room.apartment_id ? 'apartment' : 'branch');
     setFormData({
-      apartment_id: room.apartment_id,
+      apartment_id: room.apartment_id || '',
+      branch_id: room.branch_id || '',
       name: room.name,
       capacity: room.capacity,
       price_per_night: room.price_per_night,
@@ -216,20 +267,54 @@ export function RoomManager() {
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="apartment">Apartment</Label>
-                <Select value={formData.apartment_id} onValueChange={(value) => setFormData({ ...formData, apartment_id: value })}>
+                <Label>Association Type</Label>
+                <Select value={associationType} onValueChange={(value: 'apartment' | 'branch') => {
+                  setAssociationType(value);
+                  setFormData({ ...formData, apartment_id: '', branch_id: '' });
+                }}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select an apartment" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {apartments.map((apartment) => (
-                      <SelectItem key={apartment.id} value={apartment.id}>
-                        {apartment.name} - {apartment.branches?.name}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="apartment">Associate with Apartment</SelectItem>
+                    <SelectItem value="branch">Associate with Branch</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
+              {associationType === 'apartment' ? (
+                <div className="space-y-2">
+                  <Label htmlFor="apartment">Apartment</Label>
+                  <Select value={formData.apartment_id} onValueChange={(value) => setFormData({ ...formData, apartment_id: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select an apartment" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {apartments.map((apartment) => (
+                        <SelectItem key={apartment.id} value={apartment.id}>
+                          {apartment.name} - {apartment.branches?.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="branch">Branch</Label>
+                  <Select value={formData.branch_id} onValueChange={(value) => setFormData({ ...formData, branch_id: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a branch" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {branches.map((branch) => (
+                        <SelectItem key={branch.id} value={branch.id}>
+                          {branch.name} - {branch.city}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               
               <div className="space-y-2">
                 <Label htmlFor="name">Room Name</Label>
@@ -356,8 +441,8 @@ export function RoomManager() {
               {rooms.map((room) => (
                 <TableRow key={room.id}>
                   <TableCell className="font-medium">{room.name}</TableCell>
-                  <TableCell>{room.apartments?.name || 'N/A'}</TableCell>
-                  <TableCell>{room.apartments?.branches?.name || 'N/A'}</TableCell>
+                  <TableCell>{room.apartments?.name || (room.apartment_id ? 'N/A' : 'Direct to Branch')}</TableCell>
+                  <TableCell>{room.apartments?.branches?.name || room.branches?.name || 'N/A'}</TableCell>
                   <TableCell>{room.capacity}</TableCell>
                   <TableCell>₨{room.price_per_night}</TableCell>
                     <TableCell>

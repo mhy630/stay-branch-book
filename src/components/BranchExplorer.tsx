@@ -1,17 +1,18 @@
 import { useMemo, useState } from "react";
-import { useBackendData, type BackendBranch, type BackendApartment } from "@/hooks/useBackendData";
+import { useBackendData, type BackendBranch, type BackendApartment, type BackendRoom } from "@/hooks/useBackendData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Bath, BedDouble, Building2, MapPin } from "lucide-react";
+import { Bath, BedDouble, Building2, MapPin, Users } from "lucide-react";
 import { WHATSAPP_NUMBER } from "@/config";
 import { useNavigate } from "react-router-dom";
 
 const makeWhatsAppLink = (message: string) => `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 
 export const BranchExplorer = () => {
-  const { branches, loading } = useBackendData();
+  const { branches, rooms, loading } = useBackendData();
   const [active, setActive] = useState("");
+  const [activeTab, setActiveTab] = useState("rooms");
 
   // Sort branches by created_at in ascending order (oldest first)
   const sortedBranches = useMemo(() => {
@@ -20,26 +21,36 @@ export const BranchExplorer = () => {
     });
   }, [branches]);
 
-  // Sort apartments within each branch by created_at in ascending order (oldest first)
-  const sortedBranchesWithApartments = useMemo(() => {
+  // Sort apartments and rooms within each branch by created_at in ascending order (oldest first)
+  const sortedBranchesWithData = useMemo(() => {
     return sortedBranches.map(branch => ({
       ...branch,
       apartments: [...branch.apartments].sort((a, b) => {
+        return a.created_at.localeCompare(b.created_at);
+      }),
+      rooms: [...(branch.rooms || [])].sort((a, b) => {
         return a.created_at.localeCompare(b.created_at);
       })
     }));
   }, [sortedBranches]);
 
+  // Get all rooms sorted by created_at
+  const sortedRooms = useMemo(() => {
+    return [...rooms].sort((a, b) => {
+      return a.created_at.localeCompare(b.created_at);
+    });
+  }, [rooms]);
+
   // Set first branch (oldest) as active when data loads
   useMemo(() => {
-    if (sortedBranchesWithApartments.length > 0 && !active) {
-      setActive(sortedBranchesWithApartments[0].id);
+    if (sortedBranchesWithData.length > 0 && !active) {
+      setActive(sortedBranchesWithData[0].id);
     }
-  }, [sortedBranchesWithApartments, active]);
+  }, [sortedBranchesWithData, active]);
 
   const activeBranch = useMemo(() => 
-    sortedBranchesWithApartments.find(b => b.id === active) ?? sortedBranchesWithApartments[0], 
-    [active, sortedBranchesWithApartments]
+    sortedBranchesWithData.find(b => b.id === active) ?? sortedBranchesWithData[0], 
+    [active, sortedBranchesWithData]
   );
 
   if (loading) {
@@ -52,7 +63,7 @@ export const BranchExplorer = () => {
     );
   }
 
-  if (sortedBranchesWithApartments.length === 0) {
+  if (sortedBranchesWithData.length === 0) {
     return (
       <section className="container mx-auto py-12 md:py-16">
         <div className="text-center">
@@ -66,26 +77,78 @@ export const BranchExplorer = () => {
     <section className="container mx-auto py-12 md:py-16">
       <header className="mb-8 text-center">
         <p className="text-sm text-muted-foreground">Explore our locations</p>
-        <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Our Branches and Apartments</h2>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Our Branches, Rooms & Apartments</h2>
       </header>
 
-      <Tabs value={active} onValueChange={setActive} className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-8">
         <TabsList className="mx-auto">
-          {sortedBranchesWithApartments.map((b) => (
-            <TabsTrigger key={b.id} value={b.id}>{b.name}</TabsTrigger>
-          ))}
+          <TabsTrigger value="rooms">Available Rooms</TabsTrigger>
+          <TabsTrigger value="apartments">Apartments</TabsTrigger>
         </TabsList>
-        {sortedBranchesWithApartments.map((b) => (
-          <TabsContent key={b.id} value={b.id} className="pt-6">
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {b.apartments.map((apt) => (
-                <ApartmentCard key={apt.id} branchName={b.name} apartment={apt} />
+        
+        <TabsContent value="rooms" className="pt-6">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {sortedRooms.map((room) => {
+              const branchName = sortedBranchesWithData.find(b => b.id === room.branch_id)?.name || 'Unknown Branch';
+              return <RoomCard key={room.id} branchName={branchName} room={room} />;
+            })}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="apartments" className="pt-6">
+          <Tabs value={active} onValueChange={setActive} className="w-full">
+            <TabsList className="mx-auto">
+              {sortedBranchesWithData.map((b) => (
+                <TabsTrigger key={b.id} value={b.id}>{b.name}</TabsTrigger>
               ))}
-            </div>
-          </TabsContent>
-        ))}
+            </TabsList>
+            {sortedBranchesWithData.map((b) => (
+              <TabsContent key={b.id} value={b.id} className="pt-6">
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {b.apartments.map((apt) => (
+                    <ApartmentCard key={apt.id} branchName={b.name} apartment={apt} />
+                  ))}
+                </div>
+              </TabsContent>
+            ))}
+          </Tabs>
+        </TabsContent>
       </Tabs>
     </section>
+  );
+};
+
+const RoomCard = ({ room, branchName }: { room: BackendRoom; branchName: string }) => {
+  const roomMsg = `Hello! I'm interested in booking the room "${room.name}" at the ${branchName} branch.`;
+
+  return (
+    <Card className="group overflow-hidden transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span className="truncate">{room.name}</span>
+          <Users className="opacity-60" />
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="flex items-center gap-2"><Users className="opacity-70" />{room.capacity} People</div>
+          <div className="flex items-center gap-2"><MapPin className="opacity-70" />{branchName}</div>
+        </div>
+        <p className="mt-4 text-sm text-muted-foreground"><span className="font-semibold text-orange-500">₨{room.price_per_night}</span>/night</p>
+      </CardContent>
+      <CardFooter className="flex items-center justify-end">
+        <Button 
+          variant="outline"
+          size="lg"
+          className="rounded-full border-2 border-green-500 text-green-500 bg-white hover:bg-green-50 hover:border-green-500 hover:text-green-500 transition-transform duration-300 transform hover:-translate-y-1"
+          asChild
+        >
+          <a href={makeWhatsAppLink(roomMsg)} target="_blank" rel="noopener noreferrer" aria-label={`Book room ${room.name} on WhatsApp`}>
+            Book Now
+          </a>
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 
