@@ -52,7 +52,7 @@ export function RoomManager() {
     const { data, error } = await supabase
       .from('rooms')
       .select('*, apartments(name, branches(name))')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: true });
 
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -97,7 +97,7 @@ export function RoomManager() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    let newImages = [...formData.images];
+    const newImages = [...formData.images];
     
     // Upload new images
     if (imageFiles.length > 0) {
@@ -106,8 +106,9 @@ export function RoomManager() {
           const imageUrl = await uploadImage(file);
           newImages.push(imageUrl);
         }
-      } catch (error: any) {
-        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        toast({ title: 'Error', description: message, variant: 'destructive' });
         return;
       }
     }
@@ -205,7 +206,7 @@ export function RoomManager() {
               Add Room
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingRoom ? 'Edit Room' : 'Add New Room'}</DialogTitle>
               <DialogDescription>

@@ -2,9 +2,8 @@ import { useMemo, useState } from "react";
 import { useBackendData, type BackendBranch, type BackendApartment } from "@/hooks/useBackendData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bath, BedDouble, Building2, MapPin, Eye } from "lucide-react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Bath, BedDouble, Building2, MapPin } from "lucide-react";
 import { WHATSAPP_NUMBER } from "@/config";
 import { useNavigate } from "react-router-dom";
 
@@ -14,14 +13,34 @@ export const BranchExplorer = () => {
   const { branches, loading } = useBackendData();
   const [active, setActive] = useState("");
 
-  // Set first branch as active when data loads
-  useMemo(() => {
-    if (branches.length > 0 && !active) {
-      setActive(branches[0].id);
-    }
-  }, [branches, active]);
+  // Sort branches by created_at in ascending order (oldest first)
+  const sortedBranches = useMemo(() => {
+    return [...branches].sort((a, b) => {
+      return a.created_at.localeCompare(b.created_at);
+    });
+  }, [branches]);
 
-  const activeBranch = useMemo(() => branches.find(b => b.id === active) ?? branches[0], [active, branches]);
+  // Sort apartments within each branch by created_at in ascending order (oldest first)
+  const sortedBranchesWithApartments = useMemo(() => {
+    return sortedBranches.map(branch => ({
+      ...branch,
+      apartments: [...branch.apartments].sort((a, b) => {
+        return a.created_at.localeCompare(b.created_at);
+      })
+    }));
+  }, [sortedBranches]);
+
+  // Set first branch (oldest) as active when data loads
+  useMemo(() => {
+    if (sortedBranchesWithApartments.length > 0 && !active) {
+      setActive(sortedBranchesWithApartments[0].id);
+    }
+  }, [sortedBranchesWithApartments, active]);
+
+  const activeBranch = useMemo(() => 
+    sortedBranchesWithApartments.find(b => b.id === active) ?? sortedBranchesWithApartments[0], 
+    [active, sortedBranchesWithApartments]
+  );
 
   if (loading) {
     return (
@@ -33,7 +52,7 @@ export const BranchExplorer = () => {
     );
   }
 
-  if (branches.length === 0) {
+  if (sortedBranchesWithApartments.length === 0) {
     return (
       <section className="container mx-auto py-12 md:py-16">
         <div className="text-center">
@@ -52,11 +71,11 @@ export const BranchExplorer = () => {
 
       <Tabs value={active} onValueChange={setActive} className="w-full">
         <TabsList className="mx-auto">
-          {branches.map((b) => (
+          {sortedBranchesWithApartments.map((b) => (
             <TabsTrigger key={b.id} value={b.id}>{b.name}</TabsTrigger>
           ))}
         </TabsList>
-        {branches.map((b) => (
+        {sortedBranchesWithApartments.map((b) => (
           <TabsContent key={b.id} value={b.id} className="pt-6">
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {b.apartments.map((apt) => (
@@ -72,62 +91,43 @@ export const BranchExplorer = () => {
 
 const ApartmentCard = ({ apartment, branchName }: { apartment: BackendApartment; branchName: string }) => {
   const navigate = useNavigate();
-  const aptMsg = `Hello! I'm interested in booking the apartment \"${apartment.name}\" at the ${branchName} branch.`;
+  const aptMsg = `Hello! I'm interested in booking the apartment "${apartment.name}" at the ${branchName} branch.`;
+
+  const handleCardClick = () => {
+    navigate(`/apartment/${apartment.id}`);
+  };
+
   return (
-    <Card className="group overflow-hidden transition-transform duration-300 hover:-translate-y-0.5">
+    <Card 
+      className="group overflow-hidden transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer"
+      onClick={handleCardClick}
+    >
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span className="truncate">{apartment.name}</span>
           <Building2 className="opacity-60" />
         </CardTitle>
-        <CardDescription className="line-clamp-2">{apartment.description}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-3 gap-3 text-sm">
-          <div className="flex items-center gap-2"><BedDouble className="opacity-70" />{apartment.bedrooms} bd</div>
-          <div className="flex items-center gap-2"><Bath className="opacity-70" />{apartment.bathrooms} ba</div>
+          <div className="flex items-center gap-2"><BedDouble className="opacity-70" />{apartment.bedrooms} Beds</div>
+          <div className="flex items-center gap-2"><Bath className="opacity-70" />{apartment.bathrooms} Baths</div>
           <div className="flex items-center gap-2"><MapPin className="opacity-70" />{branchName}</div>
         </div>
-        <p className="mt-4 text-sm text-muted-foreground">From <span className="font-semibold text-foreground">₨{apartment.price_per_night}</span>/night (entire apartment)</p>
-
-        <Accordion type="single" collapsible className="mt-4">
-          <AccordionItem value="rooms">
-            <AccordionTrigger>View rooms & book individually</AccordionTrigger>
-            <AccordionContent>
-              <ul className="space-y-3">
-                 {apartment.rooms.map((room) => {
-                   const msg = `Hello! I'm interested in booking the \"${room.name}\" in \"${apartment.name}\" at the ${branchName} branch.`;
-                   return (
-                     <li key={room.id} className="flex items-center justify-between rounded-md border p-3">
-                       <div className="space-y-1">
-                         <p className="font-medium">{room.name}</p>
-                         <p className="text-sm text-muted-foreground">Sleeps {room.capacity} • ₨{room.price_per_night}/night</p>
-                       </div>
-                      <Button variant="whatsapp" asChild>
-                        <a href={makeWhatsAppLink(msg)} target="_blank" rel="noopener noreferrer" aria-label={`Book ${room.name} on WhatsApp`}>
-                          Book Room
-                        </a>
-                      </Button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <p className="mt-4 text-sm text-muted-foreground"><span className="font-semibold text-orange-500">₨{apartment.price_per_night}</span>/night</p>
       </CardContent>
-      <CardFooter className="flex items-center justify-between">
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate(`/apartment/${apartment.id}`)}>
-            <Eye className="h-4 w-4 mr-2" />
-            View Details
-          </Button>
-          <Button variant="whatsapp" asChild>
-            <a href={makeWhatsAppLink(aptMsg)} target="_blank" rel="noopener noreferrer" aria-label={`Book apartment ${apartment.name} on WhatsApp`}>
-              Book Now
-            </a>
-          </Button>
-        </div>
+      <CardFooter className="flex items-center justify-end">
+        <Button 
+          variant="outline"
+          size="lg"
+          className="rounded-full border-2 border-green-500 text-green-500 bg-white hover:bg-green-50 hover:border-green-500 hover:text-green-500 transition-transform duration-300 transform hover:-translate-y-1"
+          asChild 
+          onClick={(e) => e.stopPropagation()}
+        >
+          <a href={makeWhatsAppLink(aptMsg)} target="_blank" rel="noopener noreferrer" aria-label={`Book apartment ${apartment.name} on WhatsApp`}>
+            Book Now
+          </a>
+        </Button>
       </CardFooter>
     </Card>
   );

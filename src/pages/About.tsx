@@ -5,13 +5,14 @@ import { WHATSAPP_NUMBER } from "@/config";
 
 const About = () => {
   const title = "About Raye Kam-Kiraye — Affordable Accommodation Solutions";
-  const description = "Learn about our mission to provide quality, budget-friendly accommodation across multiple branches. Affordable stays without compromising on comfort.";
+  const description =
+    "Learn about our mission to provide quality, budget-friendly accommodation across multiple branches. Affordable stays without compromising on comfort.";
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Raye Kam-Kiraye",
-    url: typeof window !== 'undefined' ? window.location.origin : undefined,
+    url: typeof window !== "undefined" ? window.location.origin : undefined,
     description: "Affordable accommodation solutions across multiple branches",
     sameAs: ["https://wa.me/" + WHATSAPP_NUMBER],
   } as const;
@@ -19,12 +20,12 @@ const About = () => {
   return (
     <div>
       <Seo title={title} description={description} jsonLd={jsonLd} />
-      
+
       <main className="container mx-auto px-6 py-16">
         {/* Hero Section */}
         <section className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-heading font-bold mb-6">
-            About <span className="text-primary">Raye</span> Kam-Kiraye
+            About <span className="text-primary">Raye</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             We're more than accommodation - we're your trusted friends in hospitality, creating warm, welcoming experiences at honest, affordable prices.
@@ -43,51 +44,10 @@ const About = () => {
             </p>
           </div>
           <div className="bg-gradient-subtle rounded-lg p-8 text-center">
-            <div className="text-4xl font-bold text-primary mb-2">50+</div>
-            <p className="text-muted-foreground">Affordable Properties</p>
-            <div className="text-4xl font-bold text-primary mb-2 mt-6">10+</div>
-            <p className="text-muted-foreground">City Branches</p>
-            <div className="text-4xl font-bold text-primary mb-2 mt-6">1000+</div>
-            <p className="text-muted-foreground">Happy Guests</p>
-          </div>
-        </section>
-
-        {/* Values Section */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-heading font-bold text-center mb-12">Why Trust Us?</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-primary">🤝 Genuine Hospitality</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-base">
-                  We treat every guest like family, creating a warm, welcoming environment that makes you feel instantly at home.
-                </CardDescription>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-primary">💰 Honest Pricing</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-base">
-                  Transparent, affordable rates with no hidden costs - what you see is what you pay, always.
-                </CardDescription>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-primary">🛡️ Trustworthy Service</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-base">
-                  Reliable, consistent quality across all locations with personal attention to your needs and comfort.
-                </CardDescription>
-              </CardContent>
-            </Card>
+            <div className="text-4xl font-bold text-primary mb-2 mt-6">65+</div>
+            <p className="text-muted-foreground">5 STAR REVIEWS</p>
+            <div className="text-4xl font-bold text-primary mb-2 mt-6">150+</div>
+            <p className="text-muted-foreground">BOOKINGS</p>
           </div>
         </section>
 
@@ -108,16 +68,30 @@ const About = () => {
         {/* CTA Section */}
         <section className="text-center">
           <h2 className="text-3xl font-heading font-bold mb-6">Ready to Experience Our Hospitality?</h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Discover a welcoming place to stay that feels like home, with honest pricing and friendly service. Contact us on WhatsApp for a warm, personal booking experience.
-          </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Button variant="whatsapp" size="lg" asChild>
-              <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi! I want to know more about your affordable accommodation options.')}`} target="_blank" rel="noopener noreferrer">
+            <Button
+              variant="outline"
+              size="lg"
+              className="rounded-full border-2 border-green-500 text-green-500 bg-white hover:bg-green-50 hover:border-green-500 hover:text-green-500 transition-transform duration-300 transform hover:-translate-y-1 px-8 py-4"
+              asChild
+            >
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                  "Hi! I want to know more about your affordable accommodation options."
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Chat on WhatsApp
               </a>
             </Button>
-            <Button variant="outline" size="lg" asChild>
+
+            <Button
+              variant="outline"
+              size="lg"
+              className="rounded-full border-black transition-transform duration-300 transform hover:-translate-y-1 px-8 py-4"
+              asChild
+            >
               <a href="/">Browse Properties</a>
             </Button>
           </div>

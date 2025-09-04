@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 export interface BackendBranch {
   id: string;
@@ -9,6 +8,7 @@ export interface BackendBranch {
   address: string;
   latitude?: number;
   longitude?: number;
+  created_at: string;
   apartments: BackendApartment[];
 }
 
@@ -16,82 +16,65 @@ export interface BackendApartment {
   id: string;
   branch_id: string;
   name: string;
-  description?: string;
+  description: string;
   bedrooms: number;
   bathrooms: number;
   price_per_night: number;
-  image?: string;
-  rooms: BackendRoom[];
-}
-
-export interface BackendRoom {
-  id: string;
-  apartment_id: string;
-  name: string;
-  capacity: number;
-  price_per_night: number;
-  image?: string;
+  image: string;
+  images: string[];
+  created_at: string;
 }
 
 export const useBackendData = () => {
   const [branches, setBranches] = useState<BackendBranch[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      
-      // Fetch branches with apartments and rooms
-      const { data: branchesData, error: branchesError } = await supabase
-        .from('branches')
-        .select(`
-          id,
-          name,
-          city,
-          address,
-          latitude,
-          longitude,
-          apartments:apartments(
-            id,
-            branch_id,
-            name,
-            description,
-            bedrooms,
-            bathrooms,
-            price_per_night,
-            image,
-            rooms:rooms(
-              id,
-              apartment_id,
-              name,
-              capacity,
-              price_per_night,
-              image
-            )
-          )
-        `)
-        .order('name');
-
-      if (branchesError) {
-        throw branchesError;
-      }
-
-      setBranches(branchesData || []);
-    } catch (error: any) {
-      toast({
-        title: 'Error loading data',
-        description: error.message,
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('branches')
+          .select(`
+            id,
+            name,
+            city,
+            address,
+            latitude,
+            longitude,
+            created_at,
+            apartments (
+              id,
+              branch_id,
+              name,
+              description,
+              bedrooms,
+              bathrooms,
+              price_per_night,
+              image,
+              images,
+              created_at
+            )
+          `)
+          .order('created_at', { ascending: true })
+          .order('created_at', { ascending: true, foreignTable: 'apartments' });
+
+        if (error) {
+          console.error('Error fetching data:', error);
+          setBranches([]);
+        } else {
+          setBranches(data || []);
+        }
+      } catch (err) {
+        console.error('Unexpected error:', err);
+        setBranches([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchData();
   }, []);
 
-  return { branches, loading, refetch: fetchData };
+  return { branches, loading };
 };

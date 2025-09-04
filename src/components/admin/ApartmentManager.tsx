@@ -15,6 +15,7 @@ interface Branch {
   id: string;
   name: string;
   city: string;
+  created_at: string;
 }
 
 interface Apartment {
@@ -27,6 +28,7 @@ interface Apartment {
   price_per_night: number;
   image: string;
   images: string[];
+  created_at: string;
   branches?: { name: string };
 }
 
@@ -51,13 +53,14 @@ export function ApartmentManager() {
   useEffect(() => {
     fetchApartments();
     fetchBranches();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchApartments = async () => {
     const { data, error } = await supabase
       .from('apartments')
       .select('*, branches(name)')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: true });
 
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -69,8 +72,8 @@ export function ApartmentManager() {
   const fetchBranches = async () => {
     const { data, error } = await supabase
       .from('branches')
-      .select('id, name, city')
-      .order('name');
+      .select('id, name, city, created_at')
+      .order('created_at', { ascending: true });
 
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -79,30 +82,67 @@ export function ApartmentManager() {
     }
   };
 
+  const preprocessImage = async (file: File): Promise<File> => {
+    const img = new Image();
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    img.src = URL.createObjectURL(file);
+    
+    await new Promise((resolve) => (img.onload = resolve));
+
+    // Resize to max 800px width while maintaining aspect ratio
+    const targetWidth = 800;
+    const targetHeight = (img.height / img.width) * targetWidth;
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    ctx?.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+    return new Promise((resolve) => {
+      canvas.toBlob(
+        (blob) => resolve(new File([blob!], file.name, { type: 'image/jpeg', lastModified: Date.now() })),
+        'image/jpeg',
+        0.95 // 95% quality
+      );
+    });
+  };
+
   const uploadImage = async (file: File) => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `apartments/${fileName}`;
+    try {
+      const processedFile = await preprocessImage(file);
+      const fileExt = processedFile.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `apartments/${fileName}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('property-images')
-      .upload(filePath, file);
+      const { error: uploadError } = await supabase.storage
+        .from('property-images')
+        .upload(filePath, processedFile, {
+          contentType: 'image/jpeg',
+          cacheControl: '3600',
+          upsert: true,
+        });
 
-    if (uploadError) {
-      throw uploadError;
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage
+        .from('property-images')
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    } catch (error: unknown) {
+      let message = 'Unknown error';
+      if (error instanceof Error) {
+        message = error.message;
+      }
+      throw new Error(`Failed to upload image ${file.name}: ${message}`);
     }
-
-    const { data } = supabase.storage
-      .from('property-images')
-      .getPublicUrl(filePath);
-
-    return data.publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    let newImages = [...formData.images];
+    const newImages = [...formData.images];
     
     // Upload new images
     if (imageFiles.length > 0) {
@@ -111,8 +151,9 @@ export function ApartmentManager() {
           const imageUrl = await uploadImage(file);
           newImages.push(imageUrl);
         }
-      } catch (error: any) {
-        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        toast({ title: 'Error', description: errorMessage, variant: 'destructive' });
         return;
       }
     }
@@ -226,7 +267,7 @@ export function ApartmentManager() {
               Add Apartment
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingApartment ? 'Edit Apartment' : 'Add New Apartment'}</DialogTitle>
               <DialogDescription>
@@ -321,7 +362,6 @@ export function ApartmentManager() {
                   onChange={(e) => setImageFiles(Array.from(e.target.files || []))}
                 />
                 
-                {/* Display existing images */}
                 {formData.images.length > 0 && (
                   <div className="mt-2 space-y-2">
                     <Label>Current Images:</Label>
@@ -357,7 +397,6 @@ export function ApartmentManager() {
                   </div>
                 )}
 
-                {/* Display selected new images */}
                 {imageFiles.length > 0 && (
                   <div className="mt-2 space-y-2">
                     <Label>New Images to Upload:</Label>
@@ -405,26 +444,26 @@ export function ApartmentManager() {
                   <TableCell>{apartment.bedrooms}</TableCell>
                   <TableCell>{apartment.bathrooms}</TableCell>
                   <TableCell>₨{apartment.price_per_night}</TableCell>
-                   <TableCell>
-                     {apartment.images && apartment.images.length > 0 ? (
-                       <div className="flex space-x-2">
-                         <span className="text-sm">{apartment.images.length} image(s)</span>
-                         <Button 
-                           variant="outline" 
-                           size="sm"
-                           onClick={() => {
-                             apartment.images.forEach((img, index) => {
-                               setTimeout(() => window.open(img, '_blank'), index * 100);
-                             });
-                           }}
-                         >
-                           View All
-                         </Button>
-                       </div>
-                     ) : (
-                       <span className="text-xs text-muted-foreground">No images</span>
-                     )}
-                   </TableCell>
+                  <TableCell>
+                    {apartment.images && apartment.images.length > 0 ? (
+                      <div className="flex space-x-2">
+                        <span className="text-sm">{apartment.images.length} image(s)</span>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            apartment.images.forEach((img, index) => {
+                              setTimeout(() => window.open(img, '_blank'), index * 100);
+                            });
+                          }}
+                        >
+                          View All
+                        </Button>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">No images</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button

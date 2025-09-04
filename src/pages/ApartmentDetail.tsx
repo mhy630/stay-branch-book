@@ -8,6 +8,8 @@ import { ArrowLeft, Bath, BedDouble, MapPin, Users, ChevronLeft, ChevronRight } 
 import { useToast } from "@/hooks/use-toast";
 import { WHATSAPP_NUMBER } from "@/config";
 import { Seo } from "@/components/Seo";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import MapPicker from "@/components/MapPicker";
 
 interface ApartmentData {
   id: string;
@@ -17,10 +19,13 @@ interface ApartmentData {
   bathrooms: number;
   price_per_night: number;
   image?: string;
+  images?: string[];
   branches: {
     name: string;
     city: string;
     address: string;
+    latitude?: number;
+    longitude?: number;
   };
   rooms: Array<{
     id: string;
@@ -28,11 +33,18 @@ interface ApartmentData {
     capacity: number;
     price_per_night: number;
     image?: string;
+    images?: string[];
   }>;
 }
 
 const makeWhatsAppLink = (message: string) => 
   `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+
+// Helper to transform Supabase image URL for consistent sizing/quality
+const transformImageUrl = (url: string) => {
+  if (!url) return url;
+  return url.replace('/object/', '/render/image/') + '?width=800&resize=contain&quality=95';
+};
 
 export default function ApartmentDetail() {
   const { id } = useParams<{ id: string }>();
@@ -41,12 +53,25 @@ export default function ApartmentDetail() {
   const [apartment, setApartment] = useState<ApartmentData | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalImages, setModalImages] = useState<string[]>([]);
+  const [currentModalIndex, setCurrentModalIndex] = useState(0);
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
 
-  // Get all images (apartment + room images)
-  const allImages = apartment ? [
-    ...(apartment.image ? [apartment.image] : []),
-    ...apartment.rooms.filter(room => room.image).map(room => room.image!)
-  ] : [];
+  // Filter images based on selected room or show apartment images by default
+  const allImages = apartment
+    ? selectedRoomId
+      ? apartment.rooms
+          .filter((room) => room.id === selectedRoomId)
+          .flatMap((room) => [
+            ...(room.images ? [...room.images].reverse().map(transformImageUrl) : []),
+            ...(room.image ? [transformImageUrl(room.image)] : []),
+          ])
+      : [
+          ...(apartment.images ? [...apartment.images].reverse().map(transformImageUrl) : []),
+          ...(apartment.image ? [transformImageUrl(apartment.image)] : []),
+        ]
+    : [];
 
   useEffect(() => {
     if (!id) return;
@@ -63,17 +88,21 @@ export default function ApartmentDetail() {
             bathrooms,
             price_per_night,
             image,
+            images,
             branches:branches(
               name,
               city,
-              address
+              address,
+              latitude,
+              longitude
             ),
             rooms:rooms(
               id,
               name,
               capacity,
               price_per_night,
-              image
+              image,
+              images
             )
           `)
           .eq('id', id)
@@ -81,10 +110,14 @@ export default function ApartmentDetail() {
 
         if (error) throw error;
         setApartment(data);
-      } catch (error: any) {
+      } catch (error: unknown) {
+        let message = "An unknown error occurred";
+        if (error instanceof Error) {
+          message = error.message;
+        }
         toast({
           title: 'Error loading apartment',
-          description: error.message,
+          description: message,
           variant: 'destructive'
         });
         navigate('/');
@@ -96,12 +129,42 @@ export default function ApartmentDetail() {
     fetchApartment();
   }, [id, navigate, toast]);
 
+  // Reset currentImageIndex when allImages changes to avoid index out of bounds
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [selectedRoomId, allImages.length]);
+
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
   };
 
   const prevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+  };
+
+  const openModal = (startIndex: number) => {
+    const images = selectedRoomId
+      ? apartment?.rooms
+          .filter((room) => room.id === selectedRoomId)
+          .flatMap((room) => [
+            ...(room.images ? [...room.images].reverse().map(transformImageUrl) : []),
+            ...(room.image ? [transformImageUrl(room.image)] : []),
+          ])
+      : [
+          ...(apartment?.images ? [...apartment.images].reverse().map(transformImageUrl) : []),
+          ...(apartment?.image ? [transformImageUrl(apartment.image)] : []),
+        ];
+    setModalImages(images);
+    setCurrentModalIndex(startIndex);
+    setIsModalOpen(true);
+  };
+
+  const nextModalImage = () => {
+    setCurrentModalIndex((prev) => (prev + 1) % modalImages.length);
+  };
+
+  const prevModalImage = () => {
+    setCurrentModalIndex((prev) => (prev - 1 + modalImages.length) % modalImages.length);
   };
 
   const bookApartment = () => {
@@ -112,6 +175,14 @@ export default function ApartmentDetail() {
   const bookRoom = (room: ApartmentData['rooms'][0]) => {
     const message = `Hello! I want to book the room "${room.name}" in "${apartment?.name}" at ${apartment?.branches.name} branch.`;
     window.open(makeWhatsAppLink(message), '_blank');
+  };
+
+  const handleRoomClick = (roomId: string) => {
+    setSelectedRoomId(roomId);
+  };
+
+  const handleApartmentClick = () => {
+    setSelectedRoomId(null);
   };
 
   if (loading) {
@@ -162,14 +233,17 @@ export default function ApartmentDetail() {
 
       <div className="container mx-auto px-6 py-8">
         <div className="grid gap-8 lg:grid-cols-2">
-          {/* Image Slideshow */}
+          {/* Image Slideshow and Map */}
           <div className="space-y-4">
+            {/* Slideshow */}
             {allImages.length > 0 ? (
               <div className="relative">
                 <img
                   src={allImages[currentImageIndex]}
                   alt={`${apartment.name} - Image ${currentImageIndex + 1}`}
-                  className="w-full h-96 object-cover rounded-lg"
+                  className="w-full h-96 object-contain rounded-lg bg-black/10 cursor-pointer"
+                  loading="lazy"
+                  onClick={() => openModal(currentImageIndex)}
                 />
                 {allImages.length > 1 && (
                   <>
@@ -211,13 +285,39 @@ export default function ApartmentDetail() {
             <p className="text-sm text-muted-foreground text-center">
               {allImages.length > 0 && `${currentImageIndex + 1} of ${allImages.length} images`}
             </p>
+
+            {/* Map */}
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">Pinned Location</h3>
+              {apartment.branches.latitude && apartment.branches.longitude ? (
+                <MapPicker
+                  latitude={apartment.branches.latitude}
+                  longitude={apartment.branches.longitude}
+                  readOnly={true}
+                  showCoordinates={false}
+                />
+              ) : (
+                <div className="w-full h-64 bg-muted rounded-lg flex items-center justify-center">
+                  <p className="text-muted-foreground">Location not available</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Preload all images to avoid blur on first render */}
+          <div className="hidden">
+            {allImages.map((img, index) => (
+              <img key={index} src={img} alt="" loading="eager" />
+            ))}
           </div>
 
           {/* Apartment Details */}
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Apartment Details</CardTitle>
+                <CardTitle className="cursor-pointer" onClick={handleApartmentClick}>
+                  Apartment Details
+                </CardTitle>
                 {apartment.description && (
                   <CardDescription>{apartment.description}</CardDescription>
                 )}
@@ -236,32 +336,48 @@ export default function ApartmentDetail() {
                 
                 <div className="pt-4 border-t">
                   <h3 className="font-semibold mb-4">Booking Options</h3>
-                  
-                  {/* Book Entire Apartment */}
-                  <div className="p-4 border rounded-lg mb-4 bg-accent/50">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Book Entire Apartment</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Get the whole apartment for maximum privacy
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold">₨{apartment.price_per_night}/night</p>
-                        <Button variant="whatsapp" onClick={bookApartment}>
-                          Book Apartment
-                        </Button>
+                  <div className="space-y-3">
+                    {/* Book Entire Apartment */}
+                    <div
+                      className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                        selectedRoomId === null ? 'bg-accent/50' : 'hover:bg-accent/20'
+                      }`}
+                      onClick={handleApartmentClick}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium">Entire Apartment: {apartment.name}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Get the whole apartment for maximum privacy
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-bold">₨{apartment.price_per_night}/night</p>
+                          <Button
+                            variant="whatsapp"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              bookApartment();
+                            }}
+                          >
+                            Book Apartment
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Individual Rooms */}
-                  {apartment.rooms.length > 0 && (
-                    <div>
-                      <h4 className="font-medium mb-3">Or Book Individual Rooms</h4>
-                      <div className="space-y-3">
+                    {/* Individual Rooms */}
+                    {apartment.rooms.length > 0 && (
+                      <>
+                        <h4 className="font-medium mb-3">Or Book Individual Rooms</h4>
                         {apartment.rooms.map((room) => (
-                          <div key={room.id} className="p-4 border rounded-lg">
+                          <div
+                            key={room.id}
+                            className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                              selectedRoomId === room.id ? 'bg-accent/50' : 'hover:bg-accent/20'
+                            }`}
+                            onClick={() => handleRoomClick(room.id)}
+                          >
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-medium">{room.name}</h5>
@@ -272,16 +388,23 @@ export default function ApartmentDetail() {
                               </div>
                               <div className="text-right">
                                 <p className="font-semibold">₨{room.price_per_night}/night</p>
-                                <Button variant="outline" size="sm" onClick={() => bookRoom(room)}>
+                                <Button
+                                  variant="whatsapp"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    bookRoom(room);
+                                  }}
+                                >
                                   Book Room
                                 </Button>
                               </div>
                             </div>
                           </div>
                         ))}
-                      </div>
-                    </div>
-                  )}
+                      </>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -301,6 +424,55 @@ export default function ApartmentDetail() {
           </div>
         </div>
       </div>
+
+      {/* Full Screen Image Modal for Apartment Images */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="p-0 max-w-[100vw] max-h-[90vh] w-screen h-[90vh] bg-black">
+          <div className="relative w-full h-full flex items-center justify-center">
+            <img
+              src={modalImages[currentModalIndex]}
+              alt={`Apartment image ${currentModalIndex + 1}`}
+              className="max-w-[100vw] max-h-[90vh] object-contain"
+            />
+            {modalImages.length > 1 && (
+              <>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/80"
+                  onClick={prevModalImage}
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/80"
+                  onClick={nextModalImage}
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </Button>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                  {modalImages.map((_, index) => (
+                    <button
+                      key={index}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        index === currentModalIndex ? 'bg-primary' : 'bg-white/60'
+                      }`}
+                      onClick={() => setCurrentModalIndex(index)}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+          <style>{`
+            .dialog-close-button:hover {
+              color: white !important;
+            }
+          `}</style>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

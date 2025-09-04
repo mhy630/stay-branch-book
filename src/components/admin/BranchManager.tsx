@@ -34,14 +34,26 @@ export function BranchManager() {
   const { toast } = useToast();
 
   useEffect(() => {
+    const fetchBranches = async () => {
+      const { data, error } = await supabase
+        .from('branches')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      } else {
+        setBranches(data || []);
+      }
+    };
     fetchBranches();
-  }, []);
+  }, [toast]);
 
   const fetchBranches = async () => {
     const { data, error } = await supabase
       .from('branches')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: true });
 
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
