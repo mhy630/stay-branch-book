@@ -12,7 +12,6 @@ const makeWhatsAppLink = (message: string) => `https://wa.me/${WHATSAPP_NUMBER}?
 export const BranchExplorer = () => {
   const { branches, rooms, loading } = useBackendData();
   const [active, setActive] = useState("");
-  const [activeTab, setActiveTab] = useState("rooms");
 
   // Sort branches by created_at in ascending order (oldest first)
   const sortedBranches = useMemo(() => {
@@ -80,39 +79,41 @@ export const BranchExplorer = () => {
         <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Our Branches, Rooms & Apartments</h2>
       </header>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-8">
+      <Tabs value={active} onValueChange={setActive} className="w-full">
         <TabsList className="mx-auto">
-          <TabsTrigger value="rooms">Available Rooms</TabsTrigger>
-          <TabsTrigger value="apartments">Apartments</TabsTrigger>
+          {sortedBranchesWithData.map((b) => (
+            <TabsTrigger key={b.id} value={b.id}>{b.name}</TabsTrigger>
+          ))}
         </TabsList>
-        
-        <TabsContent value="rooms" className="pt-6">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {sortedRooms.map((room) => {
-              const branchName = sortedBranchesWithData.find(b => b.id === room.branch_id)?.name || 'Unknown Branch';
-              return <RoomCard key={room.id} branchName={branchName} room={room} />;
-            })}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="apartments" className="pt-6">
-          <Tabs value={active} onValueChange={setActive} className="w-full">
-            <TabsList className="mx-auto">
-              {sortedBranchesWithData.map((b) => (
-                <TabsTrigger key={b.id} value={b.id}>{b.name}</TabsTrigger>
-              ))}
-            </TabsList>
-            {sortedBranchesWithData.map((b) => (
-              <TabsContent key={b.id} value={b.id} className="pt-6">
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {b.apartments.map((apt) => (
-                    <ApartmentCard key={apt.id} branchName={b.name} apartment={apt} />
-                  ))}
+        {sortedBranchesWithData.map((b) => (
+          <TabsContent key={b.id} value={b.id} className="pt-6">
+            <div className="space-y-8">
+              {/* Rooms Section */}
+              {b.rooms.length > 0 && (
+                <div>
+                  <h3 className="text-2xl font-semibold mb-4">Available Rooms</h3>
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {b.rooms.map((room) => (
+                      <RoomCard key={room.id} branchName={b.name} room={room} />
+                    ))}
+                  </div>
                 </div>
-              </TabsContent>
-            ))}
-          </Tabs>
-        </TabsContent>
+              )}
+              
+              {/* Apartments Section */}
+              {b.apartments.length > 0 && (
+                <div>
+                  <h3 className="text-2xl font-semibold mb-4">Apartments</h3>
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {b.apartments.map((apt) => (
+                      <ApartmentCard key={apt.id} branchName={b.name} apartment={apt} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        ))}
       </Tabs>
     </section>
   );
