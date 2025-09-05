@@ -153,13 +153,20 @@ export function RoomManager() {
       }
     }
 
-    // Set branch_id based on association type
-    let submitData = { ...formData, images: newImages };
+    // Set branch_id and apartment_id based on association type
+    let submitData: any = { 
+      name: formData.name,
+      capacity: formData.capacity,
+      price_per_night: formData.price_per_night,
+      images: newImages 
+    };
+    
     if (associationType === 'apartment' && formData.apartment_id) {
-      const selectedApartment = apartments.find(apt => apt.id === formData.apartment_id);
-      submitData = { ...submitData, branch_id: selectedApartment?.branch_id || '', apartment_id: formData.apartment_id };
-    } else if (associationType === 'branch') {
-      submitData = { ...submitData, branch_id: formData.branch_id, apartment_id: '' };
+      submitData.apartment_id = formData.apartment_id;
+      submitData.branch_id = null;
+    } else if (associationType === 'branch' && formData.branch_id) {
+      submitData.branch_id = formData.branch_id;
+      submitData.apartment_id = null;
     }
     
     if (editingRoom) {

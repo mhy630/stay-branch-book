@@ -123,7 +123,7 @@ export type Database = {
       }
       rooms: {
         Row: {
-          apartment_id: string
+          apartment_id: string | null
           branch_id: string | null
           capacity: number
           created_at: string
@@ -135,7 +135,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          apartment_id: string
+          apartment_id?: string | null
           branch_id?: string | null
           capacity: number
           created_at?: string
@@ -147,7 +147,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          apartment_id?: string
+          apartment_id?: string | null
           branch_id?: string | null
           capacity?: number
           created_at?: string
