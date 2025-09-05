@@ -75,15 +75,14 @@ export function RoomManager() {
         images,
         created_at,
         updated_at,
-        apartments(name, branches(name)),
-        branches(name)
+        apartments!rooms_apartment_id_fkey(name, branches!apartments_branch_id_fkey(name)),
+        branches!rooms_branch_id_fkey(name)
       `)
       .order('created_at', { ascending: true });
 
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
-      // Type assertion to handle the potential SelectQueryError from branches relation
       setRooms((data as any) || []);
     }
   };
