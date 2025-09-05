@@ -137,6 +137,17 @@ export function RoomManager() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate that either apartment or branch is selected
+    if (associationType === 'apartment' && !formData.apartment_id) {
+      toast({ title: 'Error', description: 'Please select an apartment', variant: 'destructive' });
+      return;
+    }
+    
+    if (associationType === 'branch' && !formData.branch_id) {
+      toast({ title: 'Error', description: 'Please select a branch', variant: 'destructive' });
+      return;
+    }
+    
     const newImages = [...formData.images];
     
     // Upload new images
@@ -161,10 +172,10 @@ export function RoomManager() {
       images: newImages 
     };
     
-    if (associationType === 'apartment' && formData.apartment_id) {
+    if (associationType === 'apartment') {
       submitData.apartment_id = formData.apartment_id;
       submitData.branch_id = null;
-    } else if (associationType === 'branch' && formData.branch_id) {
+    } else {
       submitData.branch_id = formData.branch_id;
       submitData.apartment_id = null;
     }
