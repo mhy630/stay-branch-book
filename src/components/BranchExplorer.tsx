@@ -33,12 +33,19 @@ export const BranchExplorer = () => {
     }));
   }, [sortedBranches]);
 
-  // Get all rooms sorted by created_at
+  // Get all rooms sorted by created_at and categorized
   const sortedRooms = useMemo(() => {
     return [...rooms].sort((a, b) => {
       return a.created_at.localeCompare(b.created_at);
     });
   }, [rooms]);
+
+  // Categorize rooms: standalone branch rooms and apartment rooms
+  const roomsByCategory = useMemo(() => {
+    const branchRooms = sortedRooms.filter(room => room.branch_id && !room.apartment_id);
+    const apartmentRooms = sortedRooms.filter(room => room.apartment_id);
+    return { branchRooms, apartmentRooms };
+  }, [sortedRooms]);
 
   // Set first branch (oldest) as active when data loads
   useMemo(() => {
@@ -88,14 +95,38 @@ export const BranchExplorer = () => {
         {sortedBranchesWithData.map((b) => (
           <TabsContent key={b.id} value={b.id} className="pt-6">
             <div className="space-y-8">
-              {/* Rooms Section */}
+              {/* Branch Rooms Section */}
               {b.rooms.length > 0 && (
                 <div>
-                  <h3 className="text-2xl font-semibold mb-4">Available Rooms</h3>
+                  <h3 className="text-2xl font-semibold mb-4">Standalone Rooms</h3>
                   <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {b.rooms.map((room) => (
                       <RoomCard key={room.id} branchName={b.name} room={room} />
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Apartment Rooms Section */}
+              {roomsByCategory.apartmentRooms.filter(room => 
+                b.apartments.some(apt => apt.id === room.apartment_id)
+              ).length > 0 && (
+                <div>
+                  <h3 className="text-2xl font-semibold mb-4">Apartment Rooms</h3>
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {roomsByCategory.apartmentRooms
+                      .filter(room => b.apartments.some(apt => apt.id === room.apartment_id))
+                      .map((room) => {
+                        const apartment = b.apartments.find(apt => apt.id === room.apartment_id);
+                        return (
+                          <RoomCard 
+                            key={room.id} 
+                            branchName={b.name} 
+                            room={room} 
+                            apartmentName={apartment?.name}
+                          />
+                        );
+                      })}
                   </div>
                 </div>
               )}
@@ -119,16 +150,32 @@ export const BranchExplorer = () => {
   );
 };
 
-const RoomCard = ({ room, branchName }: { room: BackendRoom; branchName: string }) => {
-  const roomMsg = `Hello! I'm interested in booking the room "${room.name}" at the ${branchName} branch.`;
+const RoomCard = ({ room, branchName, apartmentName }: { 
+  room: BackendRoom; 
+  branchName: string; 
+  apartmentName?: string; 
+}) => {
+  const navigate = useNavigate();
+  const locationText = apartmentName ? `${apartmentName} - ${branchName}` : branchName;
+  const roomMsg = `Hello! I'm interested in booking the room "${room.name}" at ${locationText}.`;
+
+  const handleCardClick = () => {
+    navigate(`/room/${room.id}`);
+  };
 
   return (
-    <Card className="group overflow-hidden transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+    <Card 
+      className="group overflow-hidden transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer"
+      onClick={handleCardClick}
+    >
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span className="truncate">{room.name}</span>
           <Users className="opacity-60" />
         </CardTitle>
+        {apartmentName && (
+          <CardDescription className="text-xs">Part of {apartmentName}</CardDescription>
+        )}
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-3 text-sm">
@@ -142,7 +189,8 @@ const RoomCard = ({ room, branchName }: { room: BackendRoom; branchName: string 
           variant="outline"
           size="lg"
           className="rounded-full border-2 border-green-500 text-green-500 bg-white hover:bg-green-50 hover:border-green-500 hover:text-green-500 transition-transform duration-300 transform hover:-translate-y-1"
-          asChild
+          asChild 
+          onClick={(e) => e.stopPropagation()}
         >
           <a href={makeWhatsAppLink(roomMsg)} target="_blank" rel="noopener noreferrer" aria-label={`Book room ${room.name} on WhatsApp`}>
             Book Now

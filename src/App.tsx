@@ -9,6 +9,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import ApartmentDetail from "./pages/ApartmentDetail";
+import RoomDetail from "./pages/RoomDetail";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
@@ -43,6 +44,7 @@ const App = () => (
               </div>
             } />
             <Route path="/apartment/:id" element={<ApartmentDetail />} />
+            <Route path="/room/:id" element={<RoomDetail />} />
             
             {/* Admin routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
